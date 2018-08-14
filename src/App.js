@@ -14,19 +14,21 @@ import reducer from "./reducers";
 import Friends from "./Friends";
 import Online from "./Online";
 import Chat from "./Chat";
+import TabsMain from "./TabsMain";
+import Loading from "./Loading";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 const theme = createMuiTheme({
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: "#26a69a"
+            main: "#000000"
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contast with palette.primary.main
         },
         secondary: {
             //light: "#ff0000",
-            main: "#indigo"
+            main: "#d52b1e"
             // dark: will be calculated from palette.secondary.main,
             //  contrastText: "#ff0000"
         }
@@ -87,8 +89,9 @@ export default class App extends React.Component {
     }
     render() {
         console.log("App rendering");
+        const { classes } = this.props;
         if (!this.state.id) {
-            return <div>Loading</div>;
+            return <Loading />;
         }
 
         const {
@@ -119,6 +122,7 @@ export default class App extends React.Component {
                                 last_name={last_name}
                                 clickHandler={this.showUploader}
                             />
+                            <TabsMain />
                             {this.state.uploaderIsVisible && (
                                 <Uploader
                                     setImage={this.setImage}
@@ -127,7 +131,7 @@ export default class App extends React.Component {
                                     clickHandler={this.showUploader}
                                 />
                             )}
-                            <Route
+                            {/*<Route
                                 exact
                                 path="/"
                                 render={() => (
@@ -151,7 +155,7 @@ export default class App extends React.Component {
                                         logged_id={id}
                                     />
                                 )}
-                            />
+                            />*/}
                             <Route exact path="/friends" component={Friends} />
                             <Route
                                 exact

@@ -119,6 +119,124 @@ app.post("/registration", (req, res) => {
     } //end of else
 });
 
+app.post("/newsource", (req, res) => {
+    console.log("/newsource   req.body", req.body);
+    var passDB = "";
+    if (
+        req.body.source_name == "" ||
+        req.body.source_contact_id == "" ||
+        req.body.total_hours == ""
+    ) {
+        console.log("Some mandatory information is missing");
+        res.json({
+            error: "Mandatory fields are missing"
+        });
+    } else {
+        db.registerSource(
+            req.body.source_name,
+            req.body.source_contact_id,
+            req.body.description,
+            req.body.total_hours,
+            req.session.UserId
+        ).then(registeredSource => {
+            res.json({
+                success: true
+            });
+        });
+    }
+});
+
+app.get("/sourceslist", function(req, res) {
+    console.log("server get/sourceslist");
+    db.getSources(req.params.id).then(result => {
+        console.log("result for sources", result);
+        res.json({
+            success: true,
+            sourcesList: result
+        });
+    });
+});
+
+app.post("/newrequest", (req, res) => {
+    console.log("/newrequest   req.body", req.body);
+    var passDB = "";
+    if (
+        req.body.subject == "" ||
+        req.body.business_questions == "" ||
+        req.body.preferred_source == "" ||
+        req.body.preferred_analyst == "" ||
+        req.body.background_report == "" ||
+        req.body.severity_level == "" ||
+        req.body.requested_hours == "" ||
+        req.body.deadline == ""
+    ) {
+        console.log("Some mandatory information is missing");
+        res.json({
+            error: "Mandatory fields are missing"
+        });
+    } else {
+        db.registerRequest(
+            req.body.subject,
+            req.body.business_questions,
+            req.body.preferred_source,
+            req.body.preferred_analyst,
+            req.body.background_report,
+            req.body.severity_level,
+            req.body.requested_hours,
+            req.body.deadline,
+            req.session.UserId
+        ).then(newRequest => {
+            res.json({
+                success: true
+            });
+        });
+    }
+});
+
+app.post("/updaterequest/:id", function(req, res) {
+    console.log(
+        "update request id, server",
+        req.params.id,
+        req.body.request_status,
+        req.body.commited_hours,
+        req.body.actual_hours
+    );
+    db.updateRequest(
+        req.params.id,
+        req.body.request_status,
+        req.body.commited_hours,
+        req.body.actual_hours
+    ).then(result => {
+        console.log("result from updated request", result);
+        res.json({
+            success: true
+        });
+    });
+});
+
+app.get("/requestslist/:page", function(req, res) {
+    console.log("server get/requestslist");
+    db.getRequests(req.session.UserId, req.session.admin, req.params.page).then(
+        result => {
+            res.json({
+                success: true,
+                requestsList: result
+            });
+        }
+    );
+});
+
+app.get("/request/:id", function(req, res) {
+    console.log("server get request/:id");
+    db.getSingleRequest(req.params.id).then(result => {
+        console.log("result for single request", result);
+        res.json({
+            success: true,
+            request: result
+        });
+    });
+});
+
 app.post("/login", (req, res) => {
     db.getUserbyEmail(req.body.email).then(userInfo => {
         if (userInfo && userInfo.email) {
@@ -129,13 +247,9 @@ app.post("/login", (req, res) => {
                         req.session.FirstName = userInfo.first_name;
                         req.session.LastName = userInfo.last_name;
                         req.session.Email = userInfo.email;
+                        req.session.admin = userInfo.admin;
                         res.json({
                             success: true
-                            // id: userInfo.id,
-                            // first_name: userInfo.first_name,
-                            // last_name: userInfo.last_name,
-                            // email: userInfo.email,
-                            // hashedPassword: userInfo.hashed_password
                         });
                     } else {
                         res.json({
@@ -184,7 +298,8 @@ app.get("/user", function(req, res) {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 profile_pic: user.profile_pic,
-                bio: user.bio
+                bio: user.bio,
+                admin: user.admin
             });
         })
         .catch(err => console.log(err));

@@ -4,7 +4,7 @@ let db;
 if (process.env.DATABASE_URL) {
     db = spicedPg(process.env.DATABASE_URL);
 } else {
-    db = spicedPg("postgres:are:postgres@localhost:5432/socialnetwork");
+    db = spicedPg("postgres:are:postgres@localhost:5432/analystrequests");
 }
 
 exports.registerUser = function(firstName, lastName, email, hashedPassword) {
@@ -17,6 +17,155 @@ exports.registerUser = function(firstName, lastName, email, hashedPassword) {
     return db.query(q, params).then(results => {
         console.log("registered user completed");
         return results.rows[0];
+    });
+};
+
+exports.registerSource = function(
+    source_name,
+    source_contact_id,
+    description,
+    total_hours,
+    creator_id
+) {
+    const q = `
+          INSERT INTO sources (source_name, source_contact_id, description, total_hours,creator_id)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
+    `;
+    const params = [
+        source_name,
+        source_contact_id,
+        description,
+        total_hours,
+        creator_id
+    ];
+    return db.query(q, params).then(result => {
+        console.log("New Source Registered - result.rows[0]", result.rows[0]);
+        return result.rows[0];
+    });
+};
+
+exports.registerRequest = function(
+    subject,
+    business_questions,
+    preferred_source,
+    preferred_analyst,
+    background_report,
+    severity_level,
+    requested_hours,
+    deadline,
+    requester_id
+) {
+    const q = `
+          INSERT INTO requests (subject, business_questions, preferred_source,
+          preferred_analyst, background_report, severity_level, requested_hours, deadline,requester_id)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          RETURNING *
+    `;
+    const params = [
+        subject,
+        business_questions,
+        preferred_source,
+        preferred_analyst,
+        background_report,
+        severity_level,
+        requested_hours,
+        deadline,
+        requester_id
+    ];
+    return db.query(q, params).then(result => {
+        console.log("New request Registered - result.rows[0]", result.rows[0]);
+        return result.rows[0];
+    });
+};
+
+exports.getSources = function() {
+    const q = `
+        SELECT * FROM sources
+        ORDER by created_at DESC;
+        `;
+    return db
+        .query(q)
+        .then(results => {
+            console.log("All sources, results.rows for db get: ", results.rows);
+            return results.rows;
+        })
+        .catch(err => {
+            return err;
+        });
+};
+
+exports.getSingleRequest = function(id) {
+    const q = `
+        SELECT * FROM requests
+        WHERE id = $1;
+        `;
+    const params = [id];
+    return db
+        .query(q, params)
+        .then(result => {
+            console.log(
+                "single request, results.rows for db get: ",
+                result.rows
+            );
+            return result.rows;
+        })
+        .catch(err => {
+            return err;
+        });
+};
+
+exports.getRequests = function(requester_id, admin, page) {
+    console.log("requester_id", "admin", requester_id, admin, page);
+    let q = ``;
+    if (page == 1) {
+        q = `
+          SELECT * FROM requests
+          WHERE requester_id = $1
+          ORDER by created_at DESC;
+          `;
+    } else if (admin == 1 && page == 2) {
+        console.log("admin 1");
+        q = `
+          SELECT * FROM requests
+          WHERE preferred_source = $1
+          ORDER by created_at DESC;
+          `;
+    } else if (admin == 2 && page == 2) {
+        console.log("admin 2");
+        q = `
+          SELECT * FROM requests
+          ORDER by created_at DESC;
+          `;
+    }
+    const params = admin == 2 && page == 2 ? null : [requester_id];
+    return db
+        .query(q, params)
+        .then(results => {
+            return results.rows;
+        })
+        .catch(err => {
+            return err;
+        });
+};
+
+exports.updateRequest = function(
+    id,
+    request_status,
+    commited_hours,
+    actual_hours
+) {
+    const q = `
+    UPDATE requests SET
+    request_status = $2,
+    commited_hours = $3,
+    actual_hours = $4
+    WHERE id = $1;
+    `;
+    const params = [id, request_status, commited_hours, actual_hours];
+    return db.query(q, params).then(result => {
+        console.log("DB function returning updated request", result.rows);
+        return result.rows;
     });
 };
 
