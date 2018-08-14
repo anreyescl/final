@@ -87,7 +87,6 @@ exports.getSources = function() {
     return db
         .query(q)
         .then(results => {
-            console.log("All sources, results.rows for db get: ", results.rows);
             return results.rows;
         })
         .catch(err => {
@@ -106,6 +105,26 @@ exports.getSingleRequest = function(id) {
         .then(result => {
             console.log(
                 "single request, results.rows for db get: ",
+                result.rows
+            );
+            return result.rows;
+        })
+        .catch(err => {
+            return err;
+        });
+};
+
+exports.getSingleSource = function(id) {
+    const q = `
+        SELECT * FROM sources
+        WHERE id = $1;
+        `;
+    const params = [id];
+    return db
+        .query(q, params)
+        .then(result => {
+            console.log(
+                "single source, results.rows for db get: ",
                 result.rows
             );
             return result.rows;
@@ -165,6 +184,34 @@ exports.updateRequest = function(
     const params = [id, request_status, commited_hours, actual_hours];
     return db.query(q, params).then(result => {
         console.log("DB function returning updated request", result.rows);
+        return result.rows;
+    });
+};
+
+exports.updateSource = function(
+    id,
+    source_name,
+    source_contact_id,
+    description,
+    total_hours
+) {
+    const q = `
+    UPDATE sources SET
+    source_name = $2,
+    source_contact_id = $3,
+    description = $4,
+    total_hours = $5
+    WHERE id = $1;
+    `;
+    const params = [
+        id,
+        source_name,
+        source_contact_id,
+        description,
+        total_hours
+    ];
+    return db.query(q, params).then(result => {
+        console.log("DB function returning updated source", result.rows);
         return result.rows;
     });
 };

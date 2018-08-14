@@ -149,7 +149,6 @@ app.post("/newsource", (req, res) => {
 app.get("/sourceslist", function(req, res) {
     console.log("server get/sourceslist");
     db.getSources(req.params.id).then(result => {
-        console.log("result for sources", result);
         res.json({
             success: true,
             sourcesList: result
@@ -214,6 +213,29 @@ app.post("/updaterequest/:id", function(req, res) {
     });
 });
 
+app.post("/updatesource/:id", function(req, res) {
+    console.log(
+        "update source id, server",
+        req.params.id,
+        req.body.source_name,
+        req.body.source_contact_id,
+        req.body.description,
+        req.body.total_hours
+    );
+    db.updateSource(
+        req.params.id,
+        req.body.source_name,
+        req.body.source_contact_id,
+        req.body.description,
+        req.body.total_hours
+    ).then(result => {
+        console.log("result from updated source", result);
+        res.json({
+            success: true
+        });
+    });
+});
+
 app.get("/requestslist/:page", function(req, res) {
     console.log("server get/requestslist");
     db.getRequests(req.session.UserId, req.session.admin, req.params.page).then(
@@ -233,6 +255,17 @@ app.get("/request/:id", function(req, res) {
         res.json({
             success: true,
             request: result
+        });
+    });
+});
+
+app.get("/source/:id", function(req, res) {
+    console.log("server get source/:id");
+    db.getSingleSource(req.params.id).then(result => {
+        console.log("result for single source", result);
+        res.json({
+            success: true,
+            source: result
         });
     });
 });

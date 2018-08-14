@@ -2,6 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import AdminSourcesNew from "./AdminSourcesNew";
+import AdminSourcesEdit from "./AdminSourcesEdit";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -49,11 +50,13 @@ class AdminSources extends React.Component {
         super(props);
         this.state = {
             NewSourceUploaderVisible: false,
+            SourceEditVisible: false,
             sourcesList: [],
             sourceId: "",
             sourceName: ""
         };
         this.handleClickOpen = this.handleClickOpen.bind(this);
+        this.handleClickOpenEdit = this.handleClickOpenEdit.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.updateSourcesList = this.updateSourcesList.bind(this);
@@ -92,15 +95,23 @@ class AdminSources extends React.Component {
     }
 
     handleClickOpenEdit(e) {
+        console.log(
+            "click",
+            e.target.getAttribute("source_id"),
+            e.target.getAttribute("source_name")
+        );
         this.setState({
-            RequestEditVisible: true,
+            SourceEditVisible: true,
             sourceId: e.target.getAttribute("source_id"),
             sourceName: e.target.getAttribute("source_name")
         });
     }
 
     handleClose() {
-        this.setState({ NewSourceUploaderVisible: false });
+        this.setState({
+            NewSourceUploaderVisible: false,
+            SourceEditVisible: false
+        });
     }
 
     render() {
@@ -120,6 +131,13 @@ class AdminSources extends React.Component {
                     open={this.state.NewSourceUploaderVisible}
                     close={this.handleClose}
                     update={this.updateSourcesList}
+                />
+                <AdminSourcesEdit
+                    open={this.state.SourceEditVisible}
+                    close={this.handleClose}
+                    update={this.updateSourcesList}
+                    title={this.state.sourceName}
+                    id={this.state.sourceId}
                 />
                 <Button
                     variant="contained"

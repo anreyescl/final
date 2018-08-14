@@ -43,23 +43,28 @@ class AdminRequestsEdit extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.state = {
             error: null,
-            request: [],
-            request_status: "",
-            commited_hours: "",
-            actual_hours: ""
+            source_name: "",
+            source_contact_id: "",
+            description: "",
+            total_hours: ""
         };
     }
 
     componentDidUpdate(prevProps) {
         if (this.props.id !== prevProps.id) {
-            axios.get("/request/" + this.props.id).then(resp => {
-                this.setState(resp.data);
-                {
-                    request: resp.request;
-                }
+            axios.get("/source/" + this.props.id).then(resp => {
+                this.setState({
+                    source_name: resp.data.source[0].source_name,
+                    source_contact_id: Number(
+                        resp.data.source[0].source_contact_id
+                    ),
+                    description: resp.data.source[0].description,
+                    total_hours: resp.data.source[0].total_hours
+                });
+
                 console.log(
                     "Admin Requests Edit, this.state.request=",
-                    this.state.request
+                    this.state
                 );
             });
         }
@@ -73,11 +78,11 @@ class AdminRequestsEdit extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        axios.post("/updaterequest/" + this.props.id, this.state).then(resp => {
+        axios.post("/updatesource/" + this.props.id, this.state).then(resp => {
             if (resp.data.error) {
                 console.log("resp.data.error", resp.data.error);
             } else {
-                console.log("Request info updated");
+                console.log("source info updated");
                 this.props.update();
                 this.props.close();
             }
@@ -106,59 +111,38 @@ class AdminRequestsEdit extends React.Component {
                             className=""
                             autoComplete="off"
                         >
-                            <FormControl
-                                className={classes.formControl}
-                                fullWidth
-                            >
-                                <InputLabel htmlFor="label-status">
-                                    Request Status
-                                </InputLabel>
-                                <Select
-                                    value={this.state.request_status}
-                                    onChange={this.handleChange}
-                                    inputProps={{
-                                        name: "request_status",
-                                        id: "label-status"
-                                    }}
-                                >
-                                    <MenuItem value={"Pending"}>
-                                        Pending
-                                    </MenuItem>
-                                    <MenuItem value={"Approved"}>
-                                        Approved
-                                    </MenuItem>
-                                    <MenuItem value={"In progress"}>
-                                        In progress
-                                    </MenuItem>
-                                    <MenuItem value={"Cancelled"}>
-                                        Cancelled
-                                    </MenuItem>
-                                    <MenuItem value={"Postponed"}>
-                                        Postponed
-                                    </MenuItem>
-                                    <MenuItem value={"Completed"}>
-                                        Completed
-                                    </MenuItem>
-                                </Select>
-                            </FormControl>
+                            <TextField
+                                onChange={this.handleChange}
+                                value={this.state.source_name}
+                                name="source_name"
+                                label="Source Name"
+                                className={classes.textField}
+                                margin="normal"
+                            />
 
                             <TextField
                                 onChange={this.handleChange}
-                                name="commited_hours"
-                                label="Commited Hours"
+                                value={this.state.source_contact_id}
+                                name="source_contact_id"
+                                label="Verizon Contact"
+                                className={classes.textField}
                                 margin="normal"
-                                type="number"
-                                inputProps={{ min: "0", max: "5", step: "0.5" }}
-                                fullWidth
                             />
                             <TextField
                                 onChange={this.handleChange}
-                                name="actual_hours"
-                                label="Actual Hours"
+                                value={this.state.description}
+                                name="description"
+                                label="Description"
+                                className={classes.textField}
                                 margin="normal"
-                                type="number"
-                                inputProps={{ min: "0", max: "5", step: "0.5" }}
-                                fullWidth
+                            />
+                            <TextField
+                                onChange={this.handleChange}
+                                value={this.state.total_hours}
+                                name="total_hours"
+                                label="Total hours"
+                                className={classes.textField}
+                                margin="normal"
                             />
                             <DialogActions>
                                 <Button
