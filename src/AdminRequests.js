@@ -2,6 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import AdminRequestsEdit from "./AdminRequestsEdit";
+import DownloadDataButton from "./DownloadDataButton";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -41,6 +42,9 @@ const styles = theme => ({
         "&:hover": {
             backgroundColor: "#c9c9c9"
         }
+    },
+    base: {
+        marginTop: 20
     }
 });
 
@@ -110,10 +114,7 @@ class Requests extends React.Component {
         }
 
         return (
-            <div>
-                <Typography variant="display1" gutterBottom>
-                    All Requests
-                </Typography>
+            <div className={classes.base}>
                 <AdminRequestsEdit
                     open={this.state.RequestEditVisible}
                     close={this.handleClose}
@@ -121,6 +122,12 @@ class Requests extends React.Component {
                     title={this.state.requestTitle}
                     id={this.state.requestId}
                 />
+                {!!this.state.requestsList.length && (
+                    <DownloadDataButton
+                        data={this.state.requestsList}
+                        type={"requests"}
+                    />
+                )}
                 <Paper className={classes.root}>
                     <Table className={classes.table}>
                         <TableHead>

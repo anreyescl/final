@@ -95,6 +95,7 @@ app.post("/registration", (req, res) => {
                         db.registerUser(
                             req.body.firstName,
                             req.body.lastName,
+                            req.body.firstName + " " + req.body.lastName,
                             req.body.email,
                             passDB
                         ).then(registeredUser => {
@@ -121,7 +122,6 @@ app.post("/registration", (req, res) => {
 
 app.post("/newsource", (req, res) => {
     console.log("/newsource   req.body", req.body);
-    var passDB = "";
     if (
         req.body.source_name == "" ||
         req.body.source_contact_id == "" ||
@@ -135,6 +135,7 @@ app.post("/newsource", (req, res) => {
         db.registerSource(
             req.body.source_name,
             req.body.source_contact_id,
+            req.body.source_contact_name,
             req.body.description,
             req.body.total_hours,
             req.session.UserId
@@ -162,7 +163,7 @@ app.post("/newrequest", (req, res) => {
     if (
         req.body.subject == "" ||
         req.body.business_questions == "" ||
-        req.body.preferred_source == "" ||
+        req.body.preferred_source_name == "" ||
         req.body.preferred_analyst == "" ||
         req.body.background_report == "" ||
         req.body.severity_level == "" ||
@@ -177,7 +178,8 @@ app.post("/newrequest", (req, res) => {
         db.registerRequest(
             req.body.subject,
             req.body.business_questions,
-            req.body.preferred_source,
+            req.body.preferred_source_name,
+            req.body.preferred_source_id,
             req.body.preferred_analyst,
             req.body.background_report,
             req.body.severity_level,
@@ -236,6 +238,37 @@ app.post("/updatesource/:id", function(req, res) {
     });
 });
 
+app.post("/updaterequestuser/:id", function(req, res) {
+    console.log(
+        "update source id, server",
+        req.params.id,
+        req.body.subject,
+        req.body.business_questions,
+        req.body.preferred_source,
+        req.body.preferred_analyst,
+        req.body.background_report,
+        req.body.severity_level,
+        req.body.requested_hours,
+        req.body.deadline
+    );
+    db.updateRequestUser(
+        req.params.id,
+        req.body.subject,
+        req.body.business_questions,
+        req.body.preferred_source,
+        req.body.preferred_analyst,
+        req.body.background_report,
+        req.body.severity_level,
+        req.body.requested_hours,
+        req.body.deadline
+    ).then(result => {
+        console.log("result from updated source", result);
+        res.json({
+            success: true
+        });
+    });
+});
+
 app.get("/requestslist/:page", function(req, res) {
     console.log("server get/requestslist");
     db.getRequests(req.session.UserId, req.session.admin, req.params.page).then(
@@ -259,6 +292,17 @@ app.get("/request/:id", function(req, res) {
     });
 });
 
+app.get("/requestsoverview", function(req, res) {
+    console.log("server get requestoverview");
+    db.requestsOverview(req.params.id).then(result => {
+        console.log("result for requestoverview", result);
+        res.json({
+            success: true,
+            overview: result
+        });
+    });
+});
+
 app.get("/source/:id", function(req, res) {
     console.log("server get source/:id");
     db.getSingleSource(req.params.id).then(result => {
@@ -268,6 +312,24 @@ app.get("/source/:id", function(req, res) {
             source: result
         });
     });
+});
+
+app.get("/allUsers", (req, res) => {
+    console.log("beggining of get for allUsers");
+    db.returnAllUsers(req.session.UserId)
+        .then(result => {
+            console.log("Server result for get AllUsers): ", result);
+            res.json({
+                success: true,
+                users: result
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                success: false
+            });
+        });
 });
 
 app.post("/login", (req, res) => {
@@ -516,24 +578,6 @@ app.post("/unreject/:id.json", (req, res) => {
 });
 
 /////
-
-app.get("/allUsers", (req, res) => {
-    console.log("beggining of get for allUsers");
-    db.getAllUsers(req.session.UserId)
-        .then(result => {
-            console.log("Server result for get AllUsers): ", result);
-            res.json({
-                success: true,
-                users: result
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            res.json({
-                success: false
-            });
-        });
-});
 
 app.get("/commonUsers/:id", (req, res) => {
     let dataCommonUsers = [];

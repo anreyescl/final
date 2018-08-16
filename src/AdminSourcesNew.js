@@ -12,7 +12,13 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Select from "react-select";
+
+import Input from "@material-ui/core/Input";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
 
 const styles = theme => ({
     hiddenInput: {
@@ -20,11 +26,13 @@ const styles = theme => ({
     },
     textField: {
         marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
-        width: 200
+        marginRight: theme.spacing.unit
     },
     rightIcon: {
         marginLeft: theme.spacing.unit
+    },
+    selectEmpty: {
+        marginTop: theme.spacing.unit * 2
     }
 });
 
@@ -35,10 +43,29 @@ class AdminSourcesNew extends React.Component {
         this.upload = this.upload.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+
         this.state = {
-            error: null
+            error: null,
+            users: [],
+            source_contact_id: "",
+            source_contact_name: ""
         };
     }
+
+    componentDidMount() {
+        axios.get("/allUsers").then(resp => {
+            this.setState(resp.data);
+            {
+                users: resp.users;
+            }
+            console.log(
+                "adminsourcesnew componentDidMount this.state.users=",
+                this.state.users
+            );
+        });
+    }
+
     imageSelected(e) {
         this.setState({
             imageFile: e.target.files[0]
@@ -51,8 +78,7 @@ class AdminSourcesNew extends React.Component {
         console.log("imageFile: ", this.state.imageFile);
         if (this.state.imageFile == "") {
             this.setState({
-                error: "Please select a file in order to upload",
-                single: null
+                error: "Please select a file in order to upload"
             });
         } else {
             formData.append("file", this.state.imageFile);
@@ -73,15 +99,24 @@ class AdminSourcesNew extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        axios.post("/newsource", this.state).then(resp => {
-            if (resp.data.error) {
-                console.log("resp.data.error", resp.data.error);
-            } else {
-                console.log("new source added");
-                this.props.update();
-                this.props.close();
+        this.setState(
+            {
+                source_contact_name: this.state.users.filter(
+                    user => user.id == this.state.source_contact_id
+                )[0].full_name
+            },
+            () => {
+                axios.post("/newsource", this.state).then(resp => {
+                    if (resp.data.error) {
+                        console.log("resp.data.error", resp.data.error);
+                    } else {
+                        console.log("new source added");
+                        this.props.update();
+                        this.props.close();
+                    }
+                });
             }
-        });
+        );
     }
 
     render() {
@@ -98,69 +133,112 @@ class AdminSourcesNew extends React.Component {
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Please select your new profile image
+                            Complete all the fields below
                         </DialogContentText>
-                    </DialogContent>
-                    <form onSubmit={this.handleSubmit} className="">
-                        <TextField
-                            onChange={this.handleChange}
-                            name="source_name"
-                            label="Source Name"
-                            className={classes.textField}
-                            margin="normal"
-                        />
-                        <input
+
+                        <form
+                            onSubmit={this.handleSubmit}
+                            className=""
+                            autoComplete="off"
+                        >
+                            <TextField
+                                onChange={this.handleChange}
+                                name="source_name"
+                                label="Source Name"
+                                className={classes.textField}
+                                fullWidth
+                                autoFocus
+                                margin="normal"
+                            />
+                            {/*<input
                             id="file-field"
                             type="file"
                             onChange={this.imageSelected}
                             name=""
                             value=""
                             className={classes.hiddenInput}
-                        />
-                        <TextField
+                        />*/}
+                            {/*<TextField
                             onChange={this.handleChange}
                             name="source_contact_id"
                             label="Verizon Contact"
                             className={classes.textField}
+                            fullWidth
+                            autoFocus
                             margin="normal"
-                        />
-                        <TextField
-                            onChange={this.handleChange}
-                            name="description"
-                            label="Description"
-                            className={classes.textField}
-                            margin="normal"
-                        />
-                        <TextField
-                            onChange={this.handleChange}
-                            name="total_hours"
-                            label="Total hours"
-                            className={classes.textField}
-                            margin="normal"
-                        />
-                        <label htmlFor="file-field">
+                        />*/}
+
+                            <FormControl
+                                className={classes.formControl}
+                                fullWidth
+                            >
+                                <InputLabel htmlFor="label-contact">
+                                    Internal Admin
+                                </InputLabel>
+                                <Select
+                                    value={this.state.source_contact_id}
+                                    onChange={this.handleChange}
+                                    inputProps={{
+                                        name: "source_contact_id",
+                                        id: "label-contact"
+                                    }}
+                                >
+                                    {this.state.users.map(n => {
+                                        return (
+                                            <MenuItem value={n.id} key={n.id}>
+                                                {n.full_name}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                            </FormControl>
+
+                            <TextField
+                                onChange={this.handleChange}
+                                name="description"
+                                label="Description"
+                                className={classes.textField}
+                                margin="normal"
+                                fullWidth
+                                multiline
+                            />
+                            <TextField
+                                onChange={this.handleChange}
+                                name="total_hours"
+                                label="Total hours"
+                                className={classes.textField}
+                                margin="normal"
+                                type="number"
+                                inputProps={{ min: "0", step: "0.5" }}
+                                fullWidth
+                            />
+                            {/*<label htmlFor="file-field">
                             <Button variant="contained" color="default">
                                 Upload
                                 <CloudUploadIcon
                                     className={classes.rightIcon}
                                 />
                             </Button>
-                        </label>
-                        <DialogActions>
-                            <Button
-                                color="primary"
-                                id="upload-button"
-                                onClick={this.upload}
-                                name="button"
-                                type="submit"
-                            >
-                                Submit
-                            </Button>
-                            <Button onClick={this.props.close} color="primary">
-                                Cancel
-                            </Button>
-                        </DialogActions>
-                    </form>
+                        </label>*/}
+                            <DialogActions>
+                                <Button
+                                    color="primary"
+                                    id="upload-button"
+                                    onClick={this.upload}
+                                    name="button"
+                                    type="submit"
+                                >
+                                    Submit
+                                </Button>
+                                <Button
+                                    onClick={this.props.close}
+                                    color="primary"
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogActions>
+                        </form>
+                    </DialogContent>
                 </Dialog>
             </div>
         );

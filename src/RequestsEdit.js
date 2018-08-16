@@ -35,19 +35,44 @@ const styles = theme => ({
     }
 });
 
-class RequestsNew extends React.Component {
+class RequestsEdit extends React.Component {
     constructor(props) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.state = {
             error: null,
             sourcesList: [],
-            preferred_source_id: "",
-            preferred_source_name: "",
-            severity_level: ""
+            subject: "",
+            business_questions: "",
+            preferred_source: "",
+            preferred_analyst: "",
+            background_report: "",
+            severity_level: "",
+            requested_hours: "",
+            deadline: ""
         };
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.id !== prevProps.id) {
+            axios.get("/request/" + this.props.id).then(resp => {
+                this.setState({
+                    subject: resp.data.request[0].subject,
+                    business_questions: resp.data.request[0].business_questions,
+                    preferred_source: resp.data.request[0].preferred_source,
+                    preferred_analyst: resp.data.request[0].preferred_analyst,
+                    background_report: resp.data.request[0].background_report,
+                    severity_level: resp.data.request[0].severity_level,
+                    requested_hours: resp.data.request[0].requested_hours,
+                    deadline: resp.data.request[0].deadline
+                });
+
+                console.log("Requests Edit, this.state.request=", this.state);
+            });
+        }
     }
 
     componentDidMount() {
@@ -71,38 +96,30 @@ class RequestsNew extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log(this.state.sourcesList, this.state.preferred_source_id);
-        this.setState(
-            {
-                preferred_source_name: this.state.sourcesList.filter(
-                    source => source.id == this.state.preferred_source_id
-                )[0].source_name
-            },
-            () => {
-                axios.post("/newrequest", this.state).then(resp => {
-                    if (resp.data.error) {
-                        console.log("resp.data.error", resp.data.error);
-                    } else {
-                        console.log("new request added");
-                        this.props.update();
-                        this.props.close();
-                    }
-                });
-            }
-        );
+        axios
+            .post("/updaterequestuser/" + this.props.id, this.state)
+            .then(resp => {
+                if (resp.data.error) {
+                    console.log("resp.data.error", resp.data.error);
+                } else {
+                    console.log("Request updated");
+                    this.props.update();
+                    this.props.close();
+                }
+            });
     }
 
     render() {
         const { classes } = this.props;
         return (
-            <div id="RequestsNew">
+            <div id="RequestsEdit">
                 <Dialog
                     open={this.props.open}
                     onClose={this.props.close}
                     aria-labelledby="form-dialog-title"
                 >
                     <DialogTitle id="form-dialog-title">
-                        Create new request
+                        Update Request for {this.props.title}
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
@@ -117,6 +134,7 @@ class RequestsNew extends React.Component {
                         >
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.subject}
                                 name="subject"
                                 label="Subject"
                                 margin="normal"
@@ -126,6 +144,7 @@ class RequestsNew extends React.Component {
                             />
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.business_questions}
                                 name="business_questions"
                                 label="Business questions to address "
                                 margin="normal"
@@ -140,17 +159,17 @@ class RequestsNew extends React.Component {
                                     Preferred Source
                                 </InputLabel>
                                 <Select
-                                    value={this.state.preferred_source_id}
+                                    value={this.state.preferred_source}
                                     onChange={this.handleChange}
                                     inputProps={{
-                                        name: "preferred_source_id",
+                                        name: "preferred_source",
                                         id: "label-source"
                                     }}
                                 >
                                     {this.state.sourcesList.map(n => {
                                         return (
                                             <MenuItem value={n.id} key={n.id}>
-                                                {n.source_name}
+                                                {n.id}
                                             </MenuItem>
                                         );
                                     })}
@@ -158,6 +177,7 @@ class RequestsNew extends React.Component {
                             </FormControl>
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.preferred_analyst}
                                 name="preferred_analyst"
                                 label="Preferred Analyst(s)"
                                 margin="normal"
@@ -166,6 +186,7 @@ class RequestsNew extends React.Component {
 
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.background_report}
                                 name="background_report"
                                 label="Background Report, if relevant"
                                 margin="normal"
@@ -196,6 +217,7 @@ class RequestsNew extends React.Component {
 
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.requested_hours}
                                 name="requested_hours"
                                 label="Number of hours – 0.5 hrs, 1 hr, others ( please describe )"
                                 margin="normal"
@@ -205,6 +227,7 @@ class RequestsNew extends React.Component {
                             />
                             <TextField
                                 onChange={this.handleChange}
+                                value={this.state.deadline}
                                 name="deadline"
                                 label="Deadline, if applicable "
                                 margin="normal"
@@ -238,8 +261,8 @@ class RequestsNew extends React.Component {
     }
 }
 
-RequestsNew.propTypes = {
+RequestsEdit.propTypes = {
     classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(RequestsNew);
+export default withStyles(styles)(RequestsEdit);

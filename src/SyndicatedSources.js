@@ -23,7 +23,8 @@ const styles = theme => ({
         cursor: "pointer"
     },
     list: {
-        display: "flex"
+        display: "flex",
+        marginTop: 20
     }
 });
 
@@ -89,15 +90,7 @@ class SyndicatedSources extends React.Component {
             </div>
         );
 
-        return (
-            <div>
-                <Typography variant="display1" gutterBottom>
-                    Syndicated Sources List
-                </Typography>
-                {!this.state.sourcesList.length && <div>No sources</div>}
-                {!!this.state.sourcesList.length && Sources}
-            </div>
-        );
+        return <div>{!!this.state.sourcesList.length && Sources}</div>;
     }
 }
 

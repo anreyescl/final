@@ -42,6 +42,9 @@ const styles = theme => ({
         "&:hover": {
             backgroundColor: "#c9c9c9"
         }
+    },
+    base: {
+        marginTop: 20
     }
 });
 
@@ -123,10 +126,7 @@ class AdminSources extends React.Component {
         }
 
         return (
-            <div>
-                <Typography variant="display1" gutterBottom>
-                    Sources Management Section
-                </Typography>
+            <div className={classes.base}>
                 <AdminSourcesNew
                     open={this.state.NewSourceUploaderVisible}
                     close={this.handleClose}
@@ -154,7 +154,7 @@ class AdminSources extends React.Component {
                                 <CustomTableCell>Source</CustomTableCell>
                                 <CustomTableCell>Logo</CustomTableCell>
                                 <CustomTableCell>
-                                    Verizon Contact
+                                    Internal Admin
                                 </CustomTableCell>
                                 <CustomTableCell>Description</CustomTableCell>
                                 <CustomTableCell>Total Hours</CustomTableCell>
@@ -186,7 +186,7 @@ class AdminSources extends React.Component {
                                             source_id={n.id}
                                             source_name={n.source_name}
                                         >
-                                            {n.source_contact_id}
+                                            {n.source_contact_name}
                                         </CustomTableCell>
                                         <CustomTableCell
                                             source_id={n.id}

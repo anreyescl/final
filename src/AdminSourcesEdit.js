@@ -41,13 +41,30 @@ class AdminRequestsEdit extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+
         this.state = {
             error: null,
+            users: [],
             source_name: "",
             source_contact_id: "",
+            source_contact_name: "",
             description: "",
             total_hours: ""
         };
+    }
+
+    componentDidMount() {
+        axios.get("/allUsers").then(resp => {
+            this.setState(resp.data);
+            {
+                users: resp.users;
+            }
+            console.log(
+                "adminsourcesnew componentDidMount this.state.users=",
+                this.state.users
+            );
+        });
     }
 
     componentDidUpdate(prevProps) {
@@ -99,7 +116,7 @@ class AdminRequestsEdit extends React.Component {
                     aria-labelledby="form-dialog-title"
                 >
                     <DialogTitle id="form-dialog-title">
-                        Update Request for {this.props.title}
+                        Update information for {this.props.title}
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
@@ -117,17 +134,46 @@ class AdminRequestsEdit extends React.Component {
                                 name="source_name"
                                 label="Source Name"
                                 className={classes.textField}
+                                fullWidth
+                                autoFocus
                                 margin="normal"
                             />
 
-                            <TextField
+                            {/*<TextField
                                 onChange={this.handleChange}
                                 value={this.state.source_contact_id}
                                 name="source_contact_id"
                                 label="Verizon Contact"
                                 className={classes.textField}
+                                fullWidth
+                                autoFocus
                                 margin="normal"
-                            />
+                            />*/}
+
+                            <FormControl
+                                className={classes.formControl}
+                                fullWidth
+                            >
+                                <InputLabel htmlFor="label-contact">
+                                    Internal Admin
+                                </InputLabel>
+                                <Select
+                                    value={this.state.source_contact_id}
+                                    onChange={this.handleChange}
+                                    inputProps={{
+                                        name: "source_contact_id",
+                                        id: "label-contact"
+                                    }}
+                                >
+                                    {this.state.users.map(n => {
+                                        return (
+                                            <MenuItem value={n.id} key={n.id}>
+                                                {n.full_name}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                            </FormControl>
                             <TextField
                                 onChange={this.handleChange}
                                 value={this.state.description}
@@ -135,6 +181,8 @@ class AdminRequestsEdit extends React.Component {
                                 label="Description"
                                 className={classes.textField}
                                 margin="normal"
+                                fullWidth
+                                multiline
                             />
                             <TextField
                                 onChange={this.handleChange}
@@ -143,6 +191,9 @@ class AdminRequestsEdit extends React.Component {
                                 label="Total hours"
                                 className={classes.textField}
                                 margin="normal"
+                                type="number"
+                                inputProps={{ min: "0", step: "0.5" }}
+                                fullWidth
                             />
                             <DialogActions>
                                 <Button

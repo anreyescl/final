@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
+import DownloadDataButton from "./DownloadDataButton";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -11,7 +12,45 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+
+import { Doughnut } from "react-chartjs-2";
+
+let data;
+
+const CustomTableCell = withStyles(theme => ({
+    head: {
+        backgroundColor: theme.palette.common.black,
+        color: theme.palette.common.white
+    },
+    body: {
+        fontSize: 14,
+        cursor: "pointer"
+    }
+}))(TableCell);
+
 const styles = theme => ({
+    root: {
+        width: "100%",
+        marginTop: theme.spacing.unit * 3,
+        overflowX: "auto"
+    },
+    table: {
+        minWidth: 700
+    },
+    row: {
+        "&:nth-of-type(odd)": {
+            backgroundColor: theme.palette.background.default
+        },
+        "&:hover": {
+            backgroundColor: "#c9c9c9"
+        }
+    },
     card: {
         maxWidth: 300,
         minWidth: 200,
@@ -24,6 +63,9 @@ const styles = theme => ({
     },
     list: {
         display: "flex"
+    },
+    base: {
+        marginTop: 20
     }
 });
 
@@ -31,41 +73,63 @@ class AdminOverview extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.getData = this.getData.bind(this);
         this.state = {
-            sourcesList: []
+            overview: []
         };
     }
     componentDidMount() {
-        axios.get("/sourceslist").then(resp => {
+        axios.get("/requestsoverview").then(resp => {
             this.setState(resp.data);
             {
-                sourcesList: resp.sourcesList;
+                overview: resp.overview;
             }
-            console.log(
-                "AdminOverview componentDidMount this.state=",
-                this.state,
-                this.state.sourcesList
-            );
         });
+    }
+
+    getData(idSource) {
+        let actual = this.state.overview.filter(
+            source => source.id == idSource
+        )[0].actual_hours;
+        let commited = this.state.overview.filter(
+            source => source.id == idSource
+        )[0].commited_hours;
+        let remaining =
+            this.state.overview.filter(source => source.id == idSource)[0]
+                .total_hours -
+            actual -
+            commited;
+        let data = {
+            labels: ["Actuals", "Commited", "Remaining"],
+            datasets: [
+                {
+                    data: [actual, commited, remaining],
+                    backgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"],
+                    hoverBackgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"]
+                }
+            ]
+        };
+        console.log(data);
+        console.log(
+            "review data",
+            this.state.overview.filter(source => source.id == idSource)[0]
+        );
+        return data;
     }
 
     render() {
         console.log("rendering AdminOverview");
+
         const { classes } = this.props;
-        if (!this.state.sourcesList) {
+        if (!this.state.overview) {
             return null;
         }
-        console.log("this.state.sourcesList=", this.state.sourcesList);
+        console.log("this.state.overview=", this.state.overview);
 
         const Sources = (
             <div className={classes.list}>
-                {this.state.sourcesList.map(source => (
+                {this.state.overview.map(source => (
                     <Card className={classes.card} key={source.id}>
-                        <CardMedia
-                            className={classes.media}
-                            image={source.source_pic || "/images/default.png"}
-                            onClick={e => (location.href = /user/ + source.id)}
-                        />
                         <CardContent>
                             <Typography
                                 gutterBottom
@@ -74,6 +138,7 @@ class AdminOverview extends React.Component {
                             >
                                 {source.source_name}
                             </Typography>
+                            <Doughnut data={this.getData(source.id)} />
                         </CardContent>
                         <CardActions>
                             <Button
@@ -90,12 +155,95 @@ class AdminOverview extends React.Component {
         );
 
         return (
-            <div>
-                <Typography variant="display1" gutterBottom>
-                    Syndicated Sources List
-                </Typography>
-                {!this.state.sourcesList.length && <div>No sources</div>}
-                {!!this.state.sourcesList.length && Sources}
+            <div className={classes.base}>
+                {Sources}
+                {!!this.state.overview.length && (
+                    <DownloadDataButton
+                        data={this.state.overview}
+                        type={"overview"}
+                    />
+                )}
+                <Paper className={classes.root}>
+                    <Table className={classes.table}>
+                        <TableHead>
+                            <TableRow>
+                                <CustomTableCell>Source</CustomTableCell>
+                                <CustomTableCell>
+                                    Number of Requests
+                                </CustomTableCell>
+                                <CustomTableCell>Total Hours</CustomTableCell>
+                                <CustomTableCell>
+                                    Requested Hours
+                                </CustomTableCell>
+                                <CustomTableCell>
+                                    Commited Hours
+                                </CustomTableCell>
+                                <CustomTableCell>Actual Hours</CustomTableCell>
+                                <CustomTableCell>
+                                    Remaining Hours
+                                </CustomTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {this.state.overview.map(n => {
+                                return (
+                                    <TableRow
+                                        className={classes.row}
+                                        key={n.id}
+                                        onClick={this.handleClickOpenEdit}
+                                    >
+                                        <CustomTableCell
+                                            component="th"
+                                            scope="row"
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.source_name}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.number_requests}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.total_hours}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.requested_hours}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.commited_hours}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.actual_hours}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            {n.total_hours -
+                                                n.actual_hours -
+                                                n.commited_hours}
+                                        </CustomTableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </Paper>
             </div>
         );
     }

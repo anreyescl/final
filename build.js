@@ -19,6 +19,9 @@ if (require.main == module) {
 
 const conf = {
     entry: ["babel-polyfill", __dirname + "/src/start.js"],
+    externals: [{ "./cptable": "var cptable" }, { "./jszip": "jszip" }],
+    node: { fs: "empty" },
+    vendor: ["xlsx", "file-saver"],
     output: {
         path: __dirname,
         filename: "bundle.js"

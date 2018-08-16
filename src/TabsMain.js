@@ -42,7 +42,7 @@ class TabsMain extends React.Component {
                     textColor="primary"
                 >
                     <Tab label="Syndicated sources" />
-                    <Tab label="Requests" />
+                    <Tab label="My Requests" />
                     <Tab label="Admin" />
                 </Tabs>
                 {value === 0 && <SyndicatedSources />}

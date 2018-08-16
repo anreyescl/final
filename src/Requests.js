@@ -2,6 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import RequestsNew from "./RequestsNew";
+// import RequestsEdit from "./RequestsEdit";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -28,7 +29,8 @@ const CustomTableCell = withStyles(theme => ({
         color: theme.palette.common.white
     },
     body: {
-        fontSize: 14
+        fontSize: 14,
+        cursor: "pointer"
     }
 }))(TableCell);
 
@@ -44,7 +46,13 @@ const styles = theme => ({
     row: {
         "&:nth-of-type(odd)": {
             backgroundColor: theme.palette.background.default
+        },
+        "&:hover": {
+            backgroundColor: "#c9c9c9"
         }
+    },
+    base: {
+        marginTop: 20
     }
 });
 
@@ -53,9 +61,11 @@ class Requests extends React.Component {
         super(props);
         this.state = {
             NewRequestUploaderVisible: false,
+            RequestEditVisible: false,
             requestsList: []
         };
         this.handleClickOpen = this.handleClickOpen.bind(this);
+        this.handleClickOpenEdit = this.handleClickOpenEdit.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.updateRequestsList = this.updateRequestsList.bind(this);
@@ -93,8 +103,24 @@ class Requests extends React.Component {
         this.setState({ NewRequestUploaderVisible: true });
     }
 
+    handleClickOpenEdit(e) {
+        console.log(
+            "click",
+            e.target.getAttribute("source_id"),
+            e.target.getAttribute("source_name")
+        );
+        this.setState({
+            RequestEditVisible: true,
+            RequestId: e.target.getAttribute("request_id"),
+            RequestSubject: e.target.getAttribute("request_subject")
+        });
+    }
+
     handleClose() {
-        this.setState({ NewRequestUploaderVisible: false });
+        this.setState({
+            NewRequestUploaderVisible: false,
+            RequestEditVisible: false
+        });
     }
 
     render() {
@@ -105,15 +131,19 @@ class Requests extends React.Component {
         }
 
         return (
-            <div>
-                <Typography variant="display1" gutterBottom>
-                    Requests Section
-                </Typography>
+            <div className={classes.base}>
                 <RequestsNew
                     open={this.state.NewRequestUploaderVisible}
                     close={this.handleClose}
                     update={this.updateRequestsList}
                 />
+                {/*<RequestsEdit
+                    open={this.state.RequestEditVisible}
+                    close={this.handleClose}
+                    update={this.updateRequestsList}
+                    title={this.state.RequestSubject}
+                    id={this.state.RequestId}
+                />*/}
                 <Button
                     variant="contained"
                     color="primary"
@@ -132,7 +162,7 @@ class Requests extends React.Component {
                                     Business Questions
                                 </CustomTableCell>
                                 <CustomTableCell>
-                                    Preferred Source/Admin
+                                    Preferred Source/admin
                                 </CustomTableCell>
                                 <CustomTableCell>
                                     Preferred Analyst(s)
@@ -159,41 +189,74 @@ class Requests extends React.Component {
                                     <TableRow
                                         className={classes.row}
                                         key={r.id}
+                                        onClick={this.handleClickOpenEdit}
                                     >
                                         <CustomTableCell
                                             component="th"
                                             scope="row"
+                                            request_id={r.id}
+                                            request_subject={r.subject}
                                         >
                                             {r.request_status}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.subject}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.business_questions}
                                         </CustomTableCell>
-                                        <CustomTableCell>
-                                            {r.preferred_source}
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
+                                            {r.preferred_source_name}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.preferred_analyst}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.background_report}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.severity_level}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.requested_hours}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.deadline}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.commited_hours}
                                         </CustomTableCell>
-                                        <CustomTableCell>
+                                        <CustomTableCell
+                                            request_id={r.id}
+                                            request_subject={r.subject}
+                                        >
                                             {r.actual_hours}
                                         </CustomTableCell>
                                     </TableRow>

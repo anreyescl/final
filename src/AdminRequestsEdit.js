@@ -168,7 +168,6 @@ class AdminRequestsEdit extends React.Component {
                                 <Button
                                     color="primary"
                                     id="upload-button"
-                                    onClick={this.upload}
                                     name="button"
                                     type="submit"
                                 >

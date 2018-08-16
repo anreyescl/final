@@ -7,13 +7,19 @@ if (process.env.DATABASE_URL) {
     db = spicedPg("postgres:are:postgres@localhost:5432/analystrequests");
 }
 
-exports.registerUser = function(firstName, lastName, email, hashedPassword) {
+exports.registerUser = function(
+    firstName,
+    lastName,
+    fullName,
+    email,
+    hashedPassword
+) {
     const q = `
-          INSERT INTO users (first_name, last_name, email, hashed_password)
-          VALUES ($1, $2, $3, $4)
+          INSERT INTO users (first_name, last_name,full_name, email, hashed_password)
+          VALUES ($1, $2, $3, $4, $5)
           RETURNING *
     `;
-    const params = [firstName, lastName, email, hashedPassword];
+    const params = [firstName, lastName, fullName, email, hashedPassword];
     return db.query(q, params).then(results => {
         console.log("registered user completed");
         return results.rows[0];
@@ -23,18 +29,20 @@ exports.registerUser = function(firstName, lastName, email, hashedPassword) {
 exports.registerSource = function(
     source_name,
     source_contact_id,
+    source_contact_name,
     description,
     total_hours,
     creator_id
 ) {
     const q = `
-          INSERT INTO sources (source_name, source_contact_id, description, total_hours,creator_id)
-          VALUES ($1, $2, $3, $4, $5)
+          INSERT INTO sources (source_name, source_contact_id, source_contact_name, description, total_hours,creator_id)
+          VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *
     `;
     const params = [
         source_name,
         source_contact_id,
+        source_contact_name,
         description,
         total_hours,
         creator_id
@@ -48,7 +56,8 @@ exports.registerSource = function(
 exports.registerRequest = function(
     subject,
     business_questions,
-    preferred_source,
+    preferred_source_name,
+    preferred_source_id,
     preferred_analyst,
     background_report,
     severity_level,
@@ -57,15 +66,16 @@ exports.registerRequest = function(
     requester_id
 ) {
     const q = `
-          INSERT INTO requests (subject, business_questions, preferred_source,
+          INSERT INTO requests (subject, business_questions,preferred_source_name, preferred_source_id,
           preferred_analyst, background_report, severity_level, requested_hours, deadline,requester_id)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
           RETURNING *
     `;
     const params = [
         subject,
         business_questions,
-        preferred_source,
+        preferred_source_name,
+        preferred_source_id,
         preferred_analyst,
         background_report,
         severity_level,
@@ -84,6 +94,30 @@ exports.getSources = function() {
         SELECT * FROM sources
         ORDER by created_at DESC;
         `;
+    return db
+        .query(q)
+        .then(results => {
+            return results.rows;
+        })
+        .catch(err => {
+            return err;
+        });
+};
+
+exports.requestsOverview = function() {
+    const q = `
+    SELECT *
+    FROM sources
+    LEFT JOIN (
+      SELECT preferred_source_id, SUM(requested_hours) as requested_hours,
+      SUM(commited_hours) as commited_hours, SUM(actual_hours) as actual_hours,
+      COUNT(preferred_source_id) as number_requests
+      FROM requests
+      GROUP BY preferred_source_id
+    ) totals
+    ON sources.id = totals.preferred_source_id;
+        `;
+
     return db
         .query(q)
         .then(results => {
@@ -147,7 +181,7 @@ exports.getRequests = function(requester_id, admin, page) {
         console.log("admin 1");
         q = `
           SELECT * FROM requests
-          WHERE preferred_source = $1
+          WHERE preferred_source_id = $1
           ORDER by created_at DESC;
           `;
     } else if (admin == 2 && page == 2) {
@@ -212,6 +246,46 @@ exports.updateSource = function(
     ];
     return db.query(q, params).then(result => {
         console.log("DB function returning updated source", result.rows);
+        return result.rows;
+    });
+};
+
+exports.updateRequestUser = function(
+    id,
+    subject,
+    business_questions,
+    preferred_source_id,
+    preferred_analyst,
+    background_report,
+    severity_level,
+    requested_hours,
+    deadline
+) {
+    const q = `
+    UPDATE requests SET
+    subject = $2,
+    business_questions = $3,
+    preferred_source_id = $4,
+    preferred_analyst = $5,
+    background_report = $6,
+    severity_level = $7,
+    requested_hours = $8,
+    deadline = $9
+    WHERE id = $1;
+    `;
+    const params = [
+        id,
+        subject,
+        business_questions,
+        preferred_source_id,
+        preferred_analyst,
+        background_report,
+        severity_level,
+        requested_hours,
+        deadline
+    ];
+    return db.query(q, params).then(result => {
+        console.log("DB function returning updated request", result.rows[0]);
         return result.rows;
     });
 };
@@ -385,23 +459,23 @@ exports.unrejectFriend = function(loggedUser, profileDisplayed) {
     });
 };
 
-exports.getAllUsers = function(loggedUser) {
-    console.log("getting list of all user connections");
-    const q = `
-          SELECT users.id, first_name, last_name, profile_pic, status
-          FROM friendships
-          JOIN users
-          ON (status = 1 AND receiver_id = $1 AND sender_id = users.id)
-          OR (status = 2 AND receiver_id = $1 AND sender_id = users.id)
-          OR (status = 2 AND sender_id = $1 AND receiver_id = users.id)
-          OR (status = 3 AND sender_id = users.id AND receiver_id = $1)
-      `;
-    const params = [loggedUser];
-    return db.query(q, params).then(results => {
-        console.log("results.rows[0] in getAllUsers db: ", results.rows);
-        return results.rows;
-    });
-};
+// exports.getAllUsers = function(loggedUser) {
+//     console.log("getting list of all user connections");
+//     const q = `
+//           SELECT users.id, first_name, last_name, profile_pic, status
+//           FROM friendships
+//           JOIN users
+//           ON (status = 1 AND receiver_id = $1 AND sender_id = users.id)
+//           OR (status = 2 AND receiver_id = $1 AND sender_id = users.id)
+//           OR (status = 2 AND sender_id = $1 AND receiver_id = users.id)
+//           OR (status = 3 AND sender_id = users.id AND receiver_id = $1)
+//       `;
+//     const params = [loggedUser];
+//     return db.query(q, params).then(results => {
+//         console.log("results.rows[0] in getAllUsers db: ", results.rows);
+//         return results.rows;
+//     });
+// };
 
 exports.getCommonUsers = function(loggedUser, profileDisplayed) {
     console.log("getting list of all user connections");
