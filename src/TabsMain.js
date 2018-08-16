@@ -43,11 +43,11 @@ class TabsMain extends React.Component {
                 >
                     <Tab label="Syndicated sources" />
                     <Tab label="My Requests" />
-                    <Tab label="Admin" />
+                    {this.props.admin == 2 && <Tab label="Admin" />}
                 </Tabs>
                 {value === 0 && <SyndicatedSources />}
                 {value === 1 && <Requests />}
-                {value === 2 && <Admin />}
+                {this.props.admin == 2 && (value === 2 && <Admin />)}
             </div>
         );
     }

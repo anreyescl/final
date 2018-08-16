@@ -47,32 +47,14 @@ class RequestsEdit extends React.Component {
             sourcesList: [],
             subject: "",
             business_questions: "",
-            preferred_source: "",
+            preferred_source_id: "",
+            preferred_source_name: "",
             preferred_analyst: "",
             background_report: "",
             severity_level: "",
             requested_hours: "",
             deadline: ""
         };
-    }
-
-    componentDidUpdate(prevProps) {
-        if (this.props.id !== prevProps.id) {
-            axios.get("/request/" + this.props.id).then(resp => {
-                this.setState({
-                    subject: resp.data.request[0].subject,
-                    business_questions: resp.data.request[0].business_questions,
-                    preferred_source: resp.data.request[0].preferred_source,
-                    preferred_analyst: resp.data.request[0].preferred_analyst,
-                    background_report: resp.data.request[0].background_report,
-                    severity_level: resp.data.request[0].severity_level,
-                    requested_hours: resp.data.request[0].requested_hours,
-                    deadline: resp.data.request[0].deadline
-                });
-
-                console.log("Requests Edit, this.state.request=", this.state);
-            });
-        }
     }
 
     componentDidMount() {
@@ -88,6 +70,28 @@ class RequestsEdit extends React.Component {
         });
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.props.id !== prevProps.id) {
+            axios.get("/request/" + this.props.id).then(resp => {
+                this.setState({
+                    subject: resp.data.request[0].subject,
+                    business_questions: resp.data.request[0].business_questions,
+                    preferred_source_name:
+                        resp.data.request[0].preferred_source_name,
+                    preferred_source_id:
+                        resp.data.request[0].preferred_source_id,
+                    preferred_analyst: resp.data.request[0].preferred_analyst,
+                    background_report: resp.data.request[0].background_report,
+                    severity_level: resp.data.request[0].severity_level,
+                    requested_hours: resp.data.request[0].requested_hours,
+                    deadline: resp.data.request[0].deadline
+                });
+
+                console.log("Requests Edit, this.state.request=", this.state);
+            });
+        }
+    }
+
     handleChange(e) {
         this.setState({
             [e.target.name]: e.target.value
@@ -96,17 +100,26 @@ class RequestsEdit extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        axios
-            .post("/updaterequestuser/" + this.props.id, this.state)
-            .then(resp => {
-                if (resp.data.error) {
-                    console.log("resp.data.error", resp.data.error);
-                } else {
-                    console.log("Request updated");
-                    this.props.update();
-                    this.props.close();
-                }
-            });
+        this.setState(
+            {
+                preferred_source_name: this.state.sourcesList.filter(
+                    source => source.id == this.state.preferred_source_id
+                )[0].source_name
+            },
+            () => {
+                axios
+                    .post("/updaterequestuser/" + this.props.id, this.state)
+                    .then(resp => {
+                        if (resp.data.error) {
+                            console.log("resp.data.error", resp.data.error);
+                        } else {
+                            console.log("Request updated");
+                            this.props.update();
+                            this.props.close();
+                        }
+                    });
+            }
+        );
     }
 
     render() {
@@ -159,17 +172,17 @@ class RequestsEdit extends React.Component {
                                     Preferred Source
                                 </InputLabel>
                                 <Select
-                                    value={this.state.preferred_source}
+                                    value={this.state.preferred_source_id}
                                     onChange={this.handleChange}
                                     inputProps={{
-                                        name: "preferred_source",
+                                        name: "preferred_source_id",
                                         id: "label-source"
                                     }}
                                 >
                                     {this.state.sourcesList.map(n => {
                                         return (
                                             <MenuItem value={n.id} key={n.id}>
-                                                {n.id}
+                                                {n.source_name}
                                             </MenuItem>
                                         );
                                     })}

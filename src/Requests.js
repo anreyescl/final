@@ -2,7 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import RequestsNew from "./RequestsNew";
-// import RequestsEdit from "./RequestsEdit";
+import RequestsEdit from "./RequestsEdit";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -137,13 +137,13 @@ class Requests extends React.Component {
                     close={this.handleClose}
                     update={this.updateRequestsList}
                 />
-                {/*<RequestsEdit
+                <RequestsEdit
                     open={this.state.RequestEditVisible}
                     close={this.handleClose}
                     update={this.updateRequestsList}
                     title={this.state.RequestSubject}
                     id={this.state.RequestId}
-                />*/}
+                />
                 <Button
                     variant="contained"
                     color="primary"

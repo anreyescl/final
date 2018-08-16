@@ -2,6 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import DownloadDataButton from "./DownloadDataButton";
+import AdminOverviewSource from "./AdminOverviewSource";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -18,6 +19,17 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+
+import CloseIcon from "@material-ui/icons/Close";
+import Slide from "@material-ui/core/Slide";
+import IconButton from "@material-ui/core/IconButton";
+import Dialog from "@material-ui/core/Dialog";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItem from "@material-ui/core/ListItem";
+import List from "@material-ui/core/List";
+import Divider from "@material-ui/core/Divider";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
 
 import { Doughnut } from "react-chartjs-2";
 
@@ -53,7 +65,7 @@ const styles = theme => ({
     },
     card: {
         maxWidth: 300,
-        minWidth: 200,
+        minWidth: 500,
         margin: 10
     },
     media: {
@@ -66,16 +78,31 @@ const styles = theme => ({
     },
     base: {
         marginTop: 20
+    },
+    appBar: {
+        position: "relative"
+    },
+    flex: {
+        flex: 1
     }
 });
+
+function Transition(props) {
+    return <Slide direction="up" {...props} />;
+}
 
 class AdminOverview extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.getData = this.getData.bind(this);
+        this.handleClickOpenSource = this.handleClickOpenSource.bind(this);
+        this.handleCloseSource = this.handleCloseSource.bind(this);
         this.state = {
-            overview: []
+            overview: [],
+            openSource: false,
+            sourceId: "",
+            sourceName: ""
         };
     }
     componentDidMount() {
@@ -84,6 +111,20 @@ class AdminOverview extends React.Component {
             {
                 overview: resp.overview;
             }
+        });
+    }
+
+    handleClickOpenSource(e) {
+        this.setState({
+            openSource: true,
+            sourceId: e.target.getAttribute("source_id"),
+            sourceName: e.target.getAttribute("source_name")
+        });
+    }
+
+    handleCloseSource() {
+        this.setState({
+            openSource: false
         });
     }
 
@@ -109,11 +150,11 @@ class AdminOverview extends React.Component {
                 }
             ]
         };
-        console.log(data);
-        console.log(
-            "review data",
-            this.state.overview.filter(source => source.id == idSource)[0]
-        );
+        // console.log(data);
+        // console.log(
+        //     "review data",
+        //     this.state.overview.filter(source => source.id == idSource)[0]
+        // );
         return data;
     }
 
@@ -124,7 +165,7 @@ class AdminOverview extends React.Component {
         if (!this.state.overview) {
             return null;
         }
-        console.log("this.state.overview=", this.state.overview);
+        // console.log("this.state.overview=", this.state.overview);
 
         const Sources = (
             <div className={classes.list}>
@@ -146,7 +187,7 @@ class AdminOverview extends React.Component {
                                 color="primary"
                                 onClick={e => console.log("click")}
                             >
-                                Unfriend
+                                Function
                             </Button>
                         </CardActions>
                     </Card>
@@ -156,7 +197,14 @@ class AdminOverview extends React.Component {
 
         return (
             <div className={classes.base}>
-                {Sources}
+                <AdminOverviewSource
+                    open={this.state.openSource}
+                    close={this.handleCloseSource}
+                    title={this.state.sourceName}
+                    id={this.state.sourceId}
+                    overview={this.state.overview}
+                />
+                {/*{Sources}*/}
                 {!!this.state.overview.length && (
                     <DownloadDataButton
                         data={this.state.overview}
@@ -190,7 +238,7 @@ class AdminOverview extends React.Component {
                                     <TableRow
                                         className={classes.row}
                                         key={n.id}
-                                        onClick={this.handleClickOpenEdit}
+                                        onClick={this.handleClickOpenSource}
                                     >
                                         <CustomTableCell
                                             component="th"

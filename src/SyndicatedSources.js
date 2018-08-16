@@ -82,7 +82,7 @@ class SyndicatedSources extends React.Component {
                                 color="primary"
                                 onClick={e => console.log("click")}
                             >
-                                Unfriend
+                                Function
                             </Button>
                         </CardActions>
                     </Card>

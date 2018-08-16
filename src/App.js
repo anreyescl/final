@@ -100,6 +100,7 @@ export default class App extends React.Component {
             last_name,
             profile_pic,
             bio,
+            admin,
             showBio,
             toggleShowBio
         } = this.state;
@@ -122,7 +123,7 @@ export default class App extends React.Component {
                                 last_name={last_name}
                                 clickHandler={this.showUploader}
                             />
-                            <TabsMain />
+                            <TabsMain admin={admin} />
                             {this.state.uploaderIsVisible && (
                                 <Uploader
                                     setImage={this.setImage}

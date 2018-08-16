@@ -66,7 +66,7 @@ class DownloadDataButton extends React.Component {
                     />
                     <ExcelColumn
                         label="Preferred Source"
-                        value="preferred_source"
+                        value="preferred_source_name"
                     />
                     <ExcelColumn
                         label="Preferred Analyst"

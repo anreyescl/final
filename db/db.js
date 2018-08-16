@@ -255,6 +255,7 @@ exports.updateRequestUser = function(
     subject,
     business_questions,
     preferred_source_id,
+    preferred_source_name,
     preferred_analyst,
     background_report,
     severity_level,
@@ -266,11 +267,12 @@ exports.updateRequestUser = function(
     subject = $2,
     business_questions = $3,
     preferred_source_id = $4,
-    preferred_analyst = $5,
-    background_report = $6,
-    severity_level = $7,
-    requested_hours = $8,
-    deadline = $9
+    preferred_source_name = $5,
+    preferred_analyst = $6,
+    background_report = $7,
+    severity_level = $8,
+    requested_hours = $9,
+    deadline = $10
     WHERE id = $1;
     `;
     const params = [
@@ -278,6 +280,7 @@ exports.updateRequestUser = function(
         subject,
         business_questions,
         preferred_source_id,
+        preferred_source_name,
         preferred_analyst,
         background_report,
         severity_level,

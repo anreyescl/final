@@ -138,7 +138,7 @@ class Requests extends React.Component {
                                     Business Questions
                                 </CustomTableCell>
                                 <CustomTableCell>
-                                    Preferred Source/Admin
+                                    Preferred Source
                                 </CustomTableCell>
                                 <CustomTableCell>
                                     Preferred Analyst(s)
@@ -191,7 +191,7 @@ class Requests extends React.Component {
                                             req_id={r.id}
                                             req_title={r.subject}
                                         >
-                                            {r.preferred_source}
+                                            {r.preferred_source_name}
                                         </CustomTableCell>
                                         <CustomTableCell
                                             req_id={r.id}

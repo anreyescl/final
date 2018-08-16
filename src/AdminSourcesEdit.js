@@ -42,7 +42,6 @@ class AdminRequestsEdit extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
-
         this.state = {
             error: null,
             users: [],
