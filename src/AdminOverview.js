@@ -114,6 +114,7 @@ class AdminOverview extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         // this.getData = this.getData.bind(this);
         this.setTotals = this.setTotals.bind(this);
+        this.updateOverview = this.updateOverview.bind(this);
         this.getTotalData = this.getTotalData.bind(this);
         this.handleClickOpenSource = this.handleClickOpenSource.bind(this);
         this.handleCloseSource = this.handleCloseSource.bind(this);
@@ -126,7 +127,8 @@ class AdminOverview extends React.Component {
             overviewCommited: 0,
             overviewTotal: 0,
             overviewRemaining: 0,
-            data: {}
+            data: {},
+            requestsList: []
         };
     }
     componentDidMount() {
@@ -137,6 +139,31 @@ class AdminOverview extends React.Component {
                 overview: resp.overview;
             }
             this.getTotalData();
+        });
+        axios.get("/requestslist/2").then(resp => {
+            this.setState(resp.data);
+            {
+                requestsList: resp.requestsList;
+            }
+            console.log("this.state.requestsList", this.state.requestsList);
+        });
+    }
+
+    updateOverview() {
+        axios.get("/requestsoverview").then(resp => {
+            console.log("axios response component did mount");
+            this.setState(resp.data);
+            {
+                overview: resp.overview;
+            }
+            this.getTotalData();
+        });
+        axios.get("/requestslist/2").then(resp => {
+            this.setState(resp.data);
+            {
+                requestsList: resp.requestsList;
+            }
+            console.log("this.state.requestsList", this.state.requestsList);
         });
     }
 
@@ -333,6 +360,8 @@ class AdminOverview extends React.Component {
                     title={this.state.sourceName}
                     id={this.state.sourceId}
                     overview={this.state.overview}
+                    requestsList={this.state.requestsList}
+                    update={this.updateOverview}
                 />
                 {Total}
                 {/*{Sources}*/}

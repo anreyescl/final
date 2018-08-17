@@ -2,6 +2,7 @@ import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
 import DownloadDataButton from "./DownloadDataButton";
+import AdminRequestsEdit from "./AdminRequestsEdit";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -112,6 +113,9 @@ class AdminOverviewSource extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.handleClickOpen = this.handleClickOpen.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.updateRequestsList = this.updateRequestsList.bind(this);
         this.state = {
             overview: [],
             openSource: false,
@@ -121,7 +125,11 @@ class AdminOverviewSource extends React.Component {
             overviewActuals: 0,
             overviewCommited: 0,
             overviewTotal: 0,
-            overviewRemaining: 0
+            overviewRemaining: 0,
+            requestsList: [],
+            RequestEditVisible: false,
+            requestId: "",
+            requestTitle: ""
         };
     }
 
@@ -133,7 +141,11 @@ class AdminOverviewSource extends React.Component {
                         source_name: resp.data.source[0].source_name,
                         description: resp.data.source[0].description,
                         overview: this.props.overview,
-                        source_pic: resp.data.source[0].source_pic
+                        source_pic: resp.data.source[0].source_pic,
+                        requestsList: this.props.requestsList.filter(
+                            request =>
+                                request.preferred_source_id == this.props.id
+                        )
                     },
                     () => {
                         let actual = this.state.overview.filter(
@@ -166,7 +178,14 @@ class AdminOverviewSource extends React.Component {
                                         ]
                                     }
                                 ]
-                            }
+                            },
+                            overviewActuals: Number(actual) || 0,
+                            overviewCommited: Number(commited) || 0,
+                            overviewTotal:
+                                Number(actual) +
+                                    Number(commited) +
+                                    Number(remaining) || 0,
+                            overviewRemaining: Number(remaining) || 0
                         });
                     }
                 );
@@ -174,6 +193,31 @@ class AdminOverviewSource extends React.Component {
                 console.log("AdminOverviewSource, this.state=", this.state);
             });
         }
+    }
+
+    updateRequestsList() {
+        axios.get("/requestslist/2").then(resp => {
+            this.setState({
+                requestsList: resp.data.requestsList.filter(
+                    request => request.preferred_source_id == this.props.id
+                )
+            });
+        });
+        this.props.update();
+    }
+
+    handleClickOpen(e) {
+        this.setState({
+            RequestEditVisible: true,
+            requestId: e.target.getAttribute("req_id"),
+            requestTitle: e.target.getAttribute("req_title")
+        });
+    }
+
+    handleClose() {
+        this.setState({
+            RequestEditVisible: false
+        });
     }
 
     render() {
@@ -191,6 +235,13 @@ class AdminOverviewSource extends React.Component {
 
         return (
             <div>
+                <AdminRequestsEdit
+                    open={this.state.RequestEditVisible}
+                    close={this.handleClose}
+                    update={this.updateRequestsList}
+                    title={this.state.requestTitle}
+                    id={this.state.requestId}
+                />
                 <Dialog
                     fullScreen
                     open={this.props.open}
@@ -288,96 +339,146 @@ class AdminOverviewSource extends React.Component {
                                 data={this.state.overview}
                                 type={"overview"}
                             />
-                        )}
+                        )}*/}
                         <Paper className={classes.root}>
                             <Table className={classes.table}>
                                 <TableHead>
                                     <TableRow>
                                         <CustomTableCell>
-                                            Source
+                                            Status
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Number of Requests
+                                            Created
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Total Hours
+                                            Requester
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Requested Hours
+                                            Subject
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Commited Hours
+                                            Business Questions
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Actual Hours
+                                            Preferred Source
                                         </CustomTableCell>
                                         <CustomTableCell>
-                                            Remaining Hours
+                                            Preferred Analyst(s)
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Background Report
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Severity Level
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Requested hours
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Deadline
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Commited hours
+                                        </CustomTableCell>
+                                        <CustomTableCell>
+                                            Actual hours
                                         </CustomTableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {this.state.overview.map(n => {
+                                    {this.state.requestsList.map(r => {
                                         return (
                                             <TableRow
                                                 className={classes.row}
-                                                key={n.id}
-                                                onClick={
-                                                    this.handleClickOpenSource
-                                                }
+                                                key={r.id}
+                                                onClick={this.handleClickOpen}
                                             >
                                                 <CustomTableCell
                                                     component="th"
                                                     scope="row"
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.source_name}
+                                                    {r.request_status}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.number_requests}
+                                                    {r.created_at}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.total_hours}
+                                                    {r.requester_full_name}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.requested_hours}
+                                                    {r.subject}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.commited_hours}
+                                                    {r.business_questions}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.actual_hours}
+                                                    {r.preferred_source_name}
                                                 </CustomTableCell>
                                                 <CustomTableCell
-                                                    source_id={n.id}
-                                                    source_name={n.source_name}
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
                                                 >
-                                                    {n.total_hours -
-                                                        n.actual_hours -
-                                                        n.commited_hours}
+                                                    {r.preferred_analyst}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.background_report}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.severity_level}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.requested_hours}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.deadline}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.commited_hours}
+                                                </CustomTableCell>
+                                                <CustomTableCell
+                                                    req_id={r.id}
+                                                    req_title={r.subject}
+                                                >
+                                                    {r.actual_hours}
                                                 </CustomTableCell>
                                             </TableRow>
                                         );
                                     })}
                                 </TableBody>
                             </Table>
-                        </Paper>*/}
+                        </Paper>
                     </List>
                 </Dialog>
             </div>

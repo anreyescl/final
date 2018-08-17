@@ -76,15 +76,15 @@ VALUES ('Juniper',
     7,
     1);
 
-    INSERT INTO sources (source_name,
-      source_contact_id,
-      source_contact_name,
-      description,
-      total_hours,
-      creator_id)
-    VALUES ('Planet Retail',
-      1,
-      'Super Admin',
-      'Retail channel market overviews statistics and market & retailer profiles',
-      7,
-      1);
+INSERT INTO sources (source_name,
+  source_contact_id,
+  source_contact_name,
+  description,
+  total_hours,
+  creator_id)
+VALUES ('Planet Retail',
+  1,
+  'Super Admin',
+  'Retail channel market overviews statistics and market & retailer profiles',
+  7,
+  1);

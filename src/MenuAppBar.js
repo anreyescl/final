@@ -131,7 +131,7 @@ class MenuAppBar extends React.Component {
                             className={classes.flex}
                         >
                             <Link className={classes.link1} to="/">
-                                Home
+                                {first_name} {last_name}
                             </Link>
                         </Typography>
                         {/*{first_name && (

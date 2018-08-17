@@ -14,7 +14,7 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
     card: {
-        width: 400,
+        width: 300,
         margin: 10,
         height: "auto"
     },
