@@ -40,6 +40,8 @@ class AdminRequestsEdit extends React.Component {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.imageSelected = this.imageSelected.bind(this);
+        this.uploadSourceImage = this.uploadSourceImage.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.state = {
@@ -83,6 +85,31 @@ class AdminRequestsEdit extends React.Component {
                     this.state
                 );
             });
+        }
+    }
+
+    imageSelected(e) {
+        this.setState({
+            imageFile: e.target.files[0]
+        });
+        console.log("imageFile", e.target.files[0].name);
+    }
+    uploadSourceImage() {
+        var self = this;
+        var formData = new FormData();
+        console.log("imageFile: ", this.state.imageFile);
+        if (this.state.imageFile == "") {
+            return null;
+        } else {
+            formData.append("file", this.state.imageFile);
+            axios
+                .post("/uploadSourceImage/" + this.props.id, formData)
+                .then(res => {
+                    console.log("axios post /uploadSourceImage : ", res);
+                    if (res.data.success) {
+                        this.props.update();
+                    }
+                });
         }
     }
 
@@ -137,18 +164,6 @@ class AdminRequestsEdit extends React.Component {
                                 autoFocus
                                 margin="normal"
                             />
-
-                            {/*<TextField
-                                onChange={this.handleChange}
-                                value={this.state.source_contact_id}
-                                name="source_contact_id"
-                                label="Verizon Contact"
-                                className={classes.textField}
-                                fullWidth
-                                autoFocus
-                                margin="normal"
-                            />*/}
-
                             <FormControl
                                 className={classes.formControl}
                                 fullWidth
@@ -194,11 +209,33 @@ class AdminRequestsEdit extends React.Component {
                                 inputProps={{ min: "0", step: "0.5" }}
                                 fullWidth
                             />
+                            <input
+                                id="file-field"
+                                type="file"
+                                onChange={this.imageSelected}
+                                name=""
+                                value=""
+                                className={classes.hiddenInput}
+                            />
+                            <label htmlFor="file-field">
+                                <Button
+                                    variant="contained"
+                                    color="default"
+                                    component="span"
+                                >
+                                    Upload Logo
+                                    <CloudUploadIcon
+                                        className={classes.rightIcon}
+                                    />
+                                </Button>
+                            </label>
+
                             <DialogActions>
                                 <Button
+                                    variant="contained"
                                     color="primary"
-                                    id="upload-button"
-                                    onClick={this.upload}
+                                    id="uploadSourceImage-button"
+                                    onClick={this.uploadSourceImage}
                                     name="button"
                                     type="submit"
                                 >
@@ -206,6 +243,7 @@ class AdminRequestsEdit extends React.Component {
                                 </Button>
                                 <Button
                                     onClick={this.props.close}
+                                    variant="contained"
                                     color="primary"
                                 >
                                     Cancel

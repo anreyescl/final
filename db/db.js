@@ -63,12 +63,13 @@ exports.registerRequest = function(
     severity_level,
     requested_hours,
     deadline,
-    requester_id
+    requester_id,
+    requester_full_name
 ) {
     const q = `
           INSERT INTO requests (subject, business_questions,preferred_source_name, preferred_source_id,
-          preferred_analyst, background_report, severity_level, requested_hours, deadline,requester_id)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          preferred_analyst, background_report, severity_level, requested_hours, deadline,requester_id,requester_full_name)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
           RETURNING *
     `;
     const params = [
@@ -81,7 +82,8 @@ exports.registerRequest = function(
         severity_level,
         requested_hours,
         deadline,
-        requester_id
+        requester_id,
+        requester_full_name
     ];
     return db.query(q, params).then(result => {
         console.log("New request Registered - result.rows[0]", result.rows[0]);
@@ -300,6 +302,25 @@ exports.returnAllUsers = function() {
         return results.rows;
     });
 };
+
+exports.updateSourcePic = function(id, source_pic) {
+    const q = `
+    UPDATE sources SET
+    source_pic = $2
+    WHERE id = $1
+    RETURNING *;
+    `;
+    const params = [id, source_pic];
+    return db.query(q, params).then(updatedProfilePic => {
+        console.log(
+            "DB function returning updateSourcePic",
+            updatedProfilePic.rows[0]
+        );
+        return updatedProfilePic.rows[0];
+    });
+};
+
+// other stuff below
 
 exports.checkEmail = function(emailReview) {
     console.log("db check email function");

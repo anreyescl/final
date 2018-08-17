@@ -39,10 +39,10 @@ const styles = theme => ({
 class AdminSourcesNew extends React.Component {
     constructor(props) {
         super(props);
-        this.imageSelected = this.imageSelected.bind(this);
-        this.upload = this.upload.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.imageSelected = this.imageSelected.bind(this);
+        this.uploadSourceImage = this.uploadSourceImage.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
 
         this.state = {
@@ -72,20 +72,18 @@ class AdminSourcesNew extends React.Component {
         });
         console.log("imageFile", e.target.files[0].name);
     }
-    upload() {
+    uploadSourceImage(id) {
         var self = this;
         var formData = new FormData();
         console.log("imageFile: ", this.state.imageFile);
         if (this.state.imageFile == "") {
-            this.setState({
-                error: "Please select a file in order to upload"
-            });
+            return null;
         } else {
             formData.append("file", this.state.imageFile);
-            axios.post("/upload", formData).then(res => {
-                console.log("axios post /upload : ", res);
+            axios.post("/uploadSourceImage/" + id, formData).then(res => {
+                console.log("axios post /uploadSourceImage : ", res);
                 if (res.data.success) {
-                    this.props.setImage(res.data.image);
+                    this.props.update();
                 }
             });
         }
@@ -110,7 +108,8 @@ class AdminSourcesNew extends React.Component {
                     if (resp.data.error) {
                         console.log("resp.data.error", resp.data.error);
                     } else {
-                        console.log("new source added");
+                        console.log("new source added", resp.data.source.id);
+                        this.uploadSourceImage(resp.data.source.id);
                         this.props.update();
                         this.props.close();
                     }
@@ -150,24 +149,6 @@ class AdminSourcesNew extends React.Component {
                                 autoFocus
                                 margin="normal"
                             />
-                            {/*<input
-                            id="file-field"
-                            type="file"
-                            onChange={this.imageSelected}
-                            name=""
-                            value=""
-                            className={classes.hiddenInput}
-                        />*/}
-                            {/*<TextField
-                            onChange={this.handleChange}
-                            name="source_contact_id"
-                            label="Verizon Contact"
-                            className={classes.textField}
-                            fullWidth
-                            autoFocus
-                            margin="normal"
-                        />*/}
-
                             <FormControl
                                 className={classes.formControl}
                                 fullWidth
@@ -212,19 +193,30 @@ class AdminSourcesNew extends React.Component {
                                 inputProps={{ min: "0", step: "0.5" }}
                                 fullWidth
                             />
-                            {/*<label htmlFor="file-field">
-                            <Button variant="contained" color="default">
-                                Upload
-                                <CloudUploadIcon
-                                    className={classes.rightIcon}
-                                />
-                            </Button>
-                        </label>*/}
+                            <input
+                                id="file-field"
+                                type="file"
+                                onChange={this.imageSelected}
+                                name=""
+                                value=""
+                                className={classes.hiddenInput}
+                            />
+                            <label htmlFor="file-field">
+                                <Button
+                                    variant="contained"
+                                    color="default"
+                                    component="span"
+                                >
+                                    Upload Logo
+                                    <CloudUploadIcon
+                                        className={classes.rightIcon}
+                                    />
+                                </Button>
+                            </label>
                             <DialogActions>
                                 <Button
                                     color="primary"
                                     id="upload-button"
-                                    onClick={this.upload}
                                     name="button"
                                     type="submit"
                                 >

@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "./Axios";
 import { Link } from "react-router-dom";
+import RequestsNew from "./RequestsNew";
 
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -13,18 +14,24 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
     card: {
-        maxWidth: 300,
-        minWidth: 200,
-        margin: 10
+        width: 400,
+        margin: 10,
+        height: "auto"
     },
     media: {
         height: 0,
-        paddingTop: "100%", // "56.25%" // 16:9
-        cursor: "pointer"
+        paddingTop: "56.25%" // "56.25%" // 16:9
+    },
+    description: {
+        height: 60,
+        overflow: "hidden"
     },
     list: {
+        marginTop: 20,
         display: "flex",
-        marginTop: 20
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "center"
     }
 });
 
@@ -32,8 +39,12 @@ class SyndicatedSources extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.handleClickOpen = this.handleClickOpen.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.updateRequestsList = this.updateRequestsList.bind(this);
         this.state = {
-            sourcesList: []
+            sourcesList: [],
+            NewRequestUploaderVisible: false
         };
     }
     componentDidMount() {
@@ -48,6 +59,30 @@ class SyndicatedSources extends React.Component {
                 this.state.sourcesList
             );
         });
+    }
+
+    handleClose() {
+        this.setState({
+            NewRequestUploaderVisible: false
+        });
+    }
+
+    updateRequestsList() {
+        axios.get("/requestslist/1").then(resp => {
+            this.setState(resp.data);
+            {
+                requestssList: resp.requestsList;
+            }
+            console.log(
+                "Updating requests after new one added",
+                this.state,
+                this.state.requestsList
+            );
+        });
+    }
+
+    handleClickOpen() {
+        this.setState({ NewRequestUploaderVisible: true });
     }
 
     render() {
@@ -65,7 +100,6 @@ class SyndicatedSources extends React.Component {
                         <CardMedia
                             className={classes.media}
                             image={source.source_pic || "/images/default.png"}
-                            onClick={e => (location.href = /user/ + source.id)}
                         />
                         <CardContent>
                             <Typography
@@ -75,14 +109,21 @@ class SyndicatedSources extends React.Component {
                             >
                                 {source.source_name}
                             </Typography>
+                            <Typography
+                                className={classes.description}
+                                component="p"
+                            >
+                                {source.description}
+                            </Typography>
                         </CardContent>
                         <CardActions>
                             <Button
-                                size="small"
+                                variant="contained"
                                 color="primary"
-                                onClick={e => console.log("click")}
+                                type="submit"
+                                onClick={this.handleClickOpen}
                             >
-                                Function
+                                Request Analysis
                             </Button>
                         </CardActions>
                     </Card>
@@ -90,7 +131,16 @@ class SyndicatedSources extends React.Component {
             </div>
         );
 
-        return <div>{!!this.state.sourcesList.length && Sources}</div>;
+        return (
+            <div>
+                <RequestsNew
+                    open={this.state.NewRequestUploaderVisible}
+                    close={this.handleClose}
+                    update={this.updateRequestsList}
+                />
+                {!!this.state.sourcesList.length && Sources}
+            </div>
+        );
     }
 }
 

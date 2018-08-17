@@ -102,30 +102,6 @@ class MenuAppBar extends React.Component {
                             {first_name && (
                                 <div>
                                     <MenuItem onClick={this.handleClose}>
-                                        <Link
-                                            className={classes.link2}
-                                            to="/friends"
-                                        >
-                                            Friends
-                                        </Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleClose}>
-                                        <Link
-                                            className={classes.link2}
-                                            to="/chat"
-                                        >
-                                            Chat
-                                        </Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleClose}>
-                                        <Link
-                                            className={classes.link2}
-                                            to="/online"
-                                        >
-                                            Online users
-                                        </Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleClose}>
                                         <a
                                             className={classes.link2}
                                             href="/logout"
@@ -148,21 +124,6 @@ class MenuAppBar extends React.Component {
                                     </MenuItem>
                                 </div>
                             )}
-
-                            {/*<MenuItem>
-                                <FormGroup>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={first_name}
-                                                onChange={this.handleChange}
-                                                aria-label="LoginSwitch"
-                                            />
-                                        }
-                                        label={first_name ? "Logout" : "Login"}
-                                    />
-                                </FormGroup>
-                            </MenuItem>*/}
                         </Menu>
                         <Typography
                             variant="title"
@@ -173,7 +134,7 @@ class MenuAppBar extends React.Component {
                                 Home
                             </Link>
                         </Typography>
-                        {first_name && (
+                        {/*{first_name && (
                             <div>
                                 <IconButton
                                     aria-owns={open ? "menu-appbar" : null}
@@ -188,7 +149,7 @@ class MenuAppBar extends React.Component {
                                     />
                                 </IconButton>
                             </div>
-                        )}
+                        )}*/}
                     </Toolbar>
                 </AppBar>
             </div>

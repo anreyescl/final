@@ -162,7 +162,7 @@ class Requests extends React.Component {
                                     Business Questions
                                 </CustomTableCell>
                                 <CustomTableCell>
-                                    Preferred Source/admin
+                                    Preferred Source
                                 </CustomTableCell>
                                 <CustomTableCell>
                                     Preferred Analyst(s)

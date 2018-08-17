@@ -59,6 +59,11 @@ class DownloadDataButton extends React.Component {
             >
                 <ExcelSheet data={this.props.data} name="Overview">
                     <ExcelColumn label="Status" value="request_status" />
+                    <ExcelColumn label="Created" value="created_at" />
+                    <ExcelColumn
+                        label="Requester"
+                        value="requester_full_name"
+                    />
                     <ExcelColumn label="Subject" value="subject" />
                     <ExcelColumn
                         label="Busines Questions"

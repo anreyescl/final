@@ -141,7 +141,8 @@ app.post("/newsource", (req, res) => {
             req.session.UserId
         ).then(registeredSource => {
             res.json({
-                success: true
+                success: true,
+                source: registeredSource
             });
         });
     }
@@ -185,7 +186,8 @@ app.post("/newrequest", (req, res) => {
             req.body.severity_level,
             req.body.requested_hours,
             req.body.deadline,
-            req.session.UserId
+            req.session.UserId,
+            req.session.FirstName + " " + req.session.LastName
         ).then(newRequest => {
             res.json({
                 success: true
@@ -402,19 +404,37 @@ app.get("/user", function(req, res) {
         .catch(err => console.log(err));
 });
 
-app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
+app.post("/uploadSourceImage/:id", uploader.single("file"), s3.upload, function(
+    req,
+    res
+) {
     console.log("req body is", req.body, "req file is", req.file);
-    db.updateProfilePic(
-        req.session.UserId,
-        config.s3Url + req.file.filename
-    ).then(result => {
-        console.log("result from app.post upload", result.profile_pic);
-        res.json({
-            success: true,
-            image: result.profile_pic
-        });
-    });
+    db.updateSourcePic(req.params.id, config.s3Url + req.file.filename).then(
+        result => {
+            console.log("result from app.post upload", result.source_pic);
+            res.json({
+                success: true
+            });
+        }
+    );
 });
+
+// app.post("/uploadSourceImage", uploader.single("file"), s3.upload, function(
+//     req,
+//     res
+// ) {
+//     console.log("req body is", req.body, "req file is", req.file);
+//     db.updateProfilePic(
+//         req.session.UserId,
+//         config.s3Url + req.file.filename
+//     ).then(result => {
+//         console.log("result from app.post upload", result.profile_pic);
+//         res.json({
+//             success: true,
+//             image: result.profile_pic
+//         });
+//     });
+// });
 
 app.post("/update-bio", function(req, res) {
     console.log("req body.bio", req.body.bio);

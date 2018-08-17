@@ -30,6 +30,8 @@ import Divider from "@material-ui/core/Divider";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 
+import Avatar from "@material-ui/core/Avatar";
+
 import { Doughnut } from "react-chartjs-2";
 
 let data;
@@ -64,11 +66,12 @@ const styles = theme => ({
     },
     card: {
         display: "flex",
+        flexDirection: "row",
         margin: 10
     },
     chart: {
-        minWidth: 600,
-        maxWidth: 800
+        minWidth: 500,
+        maxWidth: 700
     },
     details: {
         display: "flex",
@@ -87,7 +90,17 @@ const styles = theme => ({
         flex: 1
     },
     content: {
-        flex: "1 0 auto"
+        display: "flex",
+        flexDirection: "column"
+    },
+    logo: {
+        width: 200,
+        height: 100,
+        margin: 10,
+        objectFit: "cover"
+    },
+    hours: {
+        minWidth: 250
     }
 });
 
@@ -99,13 +112,16 @@ class AdminOverviewSource extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        // this.getData = this.getData.bind(this);
         this.state = {
             overview: [],
             openSource: false,
             source_name: "",
             description: "",
-            data: {}
+            data: {},
+            overviewActuals: 0,
+            overviewCommited: 0,
+            overviewTotal: 0,
+            overviewRemaining: 0
         };
     }
 
@@ -116,7 +132,8 @@ class AdminOverviewSource extends React.Component {
                     {
                         source_name: resp.data.source[0].source_name,
                         description: resp.data.source[0].description,
-                        overview: this.props.overview
+                        overview: this.props.overview,
+                        source_pic: resp.data.source[0].source_pic
                     },
                     () => {
                         let actual = this.state.overview.filter(
@@ -203,22 +220,67 @@ class AdminOverviewSource extends React.Component {
                             <CardMedia className={classes.chart}>
                                 <Doughnut data={this.state.data} />
                             </CardMedia>
-                            <div className={classes.details}>
-                                <CardContent lassName={classes.content}>
-                                    <Typography
-                                        gutterBottom
-                                        variant="headline"
-                                        component="h2"
-                                    >
-                                        {this.state.source_name}
-                                    </Typography>
-                                </CardContent>
-                                <CardContent>
-                                    <Typography component="p">
-                                        {this.state.description}
-                                    </Typography>
-                                </CardContent>
-                            </div>
+                            <CardContent className={classes.hours}>
+                                <List>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                "Total Hours :" +
+                                                " " +
+                                                this.state.overviewTotal
+                                            }
+                                        />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                "Total Actuals :" +
+                                                " " +
+                                                this.state.overviewCommited
+                                            }
+                                        />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                "Total Remaining :" +
+                                                " " +
+                                                this.state.overviewActuals
+                                            }
+                                        />
+                                    </ListItem>
+                                    <Divider />
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                "Total Remaining :" +
+                                                " " +
+                                                this.state.overviewRemaining
+                                            }
+                                        />
+                                    </ListItem>
+                                </List>
+                            </CardContent>
+                            <CardContent className={classes.content}>
+                                <img
+                                    src={
+                                        this.state.source_pic ||
+                                        "/images/default.png"
+                                    }
+                                    alt={this.state.source_name}
+                                    className={classes.logo}
+                                />
+                                <Typography
+                                    gutterBottom
+                                    variant="headline"
+                                    component="h2"
+                                >
+                                    {this.state.source_name}
+                                </Typography>
+                                <Typography component="p">
+                                    {this.state.description}
+                                </Typography>
+                            </CardContent>
                         </Card>
                         <Divider />
                         {/*{!!this.state.overview.length && (

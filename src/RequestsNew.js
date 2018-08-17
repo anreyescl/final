@@ -216,6 +216,7 @@ class RequestsNew extends React.Component {
                             />
                             <DialogActions>
                                 <Button
+                                    variant="contained"
                                     color="primary"
                                     id="upload-button"
                                     name="button"
@@ -225,6 +226,7 @@ class RequestsNew extends React.Component {
                                 </Button>
                                 <Button
                                     onClick={this.props.close}
+                                    variant="contained"
                                     color="primary"
                                 >
                                     Cancel

@@ -41,7 +41,7 @@ class TabsMain extends React.Component {
                     indicatorColor="secondary"
                     textColor="primary"
                 >
-                    <Tab label="Syndicated sources" />
+                    <Tab label="Sources" />
                     <Tab label="My Requests" />
                     {this.props.admin == 2 && <Tab label="Admin" />}
                 </Tabs>

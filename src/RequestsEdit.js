@@ -252,6 +252,7 @@ class RequestsEdit extends React.Component {
                             />
                             <DialogActions>
                                 <Button
+                                    variant="contained"
                                     color="primary"
                                     id="upload-button"
                                     name="button"
@@ -260,8 +261,9 @@ class RequestsEdit extends React.Component {
                                     Submit
                                 </Button>
                                 <Button
-                                    onClick={this.props.close}
+                                    variant="contained"
                                     color="primary"
+                                    onClick={this.props.close}
                                 >
                                     Cancel
                                 </Button>

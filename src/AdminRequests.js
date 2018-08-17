@@ -133,6 +133,8 @@ class Requests extends React.Component {
                         <TableHead>
                             <TableRow>
                                 <CustomTableCell>Status</CustomTableCell>
+                                <CustomTableCell>Created</CustomTableCell>
+                                <CustomTableCell>Requester</CustomTableCell>
                                 <CustomTableCell>Subject</CustomTableCell>
                                 <CustomTableCell>
                                     Business Questions
@@ -174,6 +176,18 @@ class Requests extends React.Component {
                                             req_title={r.subject}
                                         >
                                             {r.request_status}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            req_id={r.id}
+                                            req_title={r.subject}
+                                        >
+                                            {r.created_at}
+                                        </CustomTableCell>
+                                        <CustomTableCell
+                                            req_id={r.id}
+                                            req_title={r.subject}
+                                        >
+                                            {r.requester_full_name}
                                         </CustomTableCell>
                                         <CustomTableCell
                                             req_id={r.id}

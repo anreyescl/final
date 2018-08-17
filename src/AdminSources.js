@@ -45,6 +45,12 @@ const styles = theme => ({
     },
     base: {
         marginTop: 20
+    },
+    logo: {
+        margin: 10,
+        width: 80,
+        height: 40,
+        objectFit: "cover"
     }
 });
 
@@ -151,8 +157,8 @@ class AdminSources extends React.Component {
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow>
-                                <CustomTableCell>Source</CustomTableCell>
                                 <CustomTableCell>Logo</CustomTableCell>
+                                <CustomTableCell>Source</CustomTableCell>
                                 <CustomTableCell>
                                     Internal Admin
                                 </CustomTableCell>
@@ -174,13 +180,20 @@ class AdminSources extends React.Component {
                                             source_id={n.id}
                                             source_name={n.source_name}
                                         >
-                                            {n.source_name}
+                                            <img
+                                                src={
+                                                    n.source_pic ||
+                                                    "/images/default.png"
+                                                }
+                                                alt={n.source_name}
+                                                className={classes.logo}
+                                            />
                                         </CustomTableCell>
                                         <CustomTableCell
                                             source_id={n.id}
                                             source_name={n.source_name}
                                         >
-                                            {n.source_pic}
+                                            {n.source_name}
                                         </CustomTableCell>
                                         <CustomTableCell
                                             source_id={n.id}

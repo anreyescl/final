@@ -56,6 +56,7 @@ updated_at TIMESTAMP
 CREATE TABLE requests (
 id SERIAL PRIMARY KEY,
 requester_id INT NOT NULL REFERENCES users(id),
+requester_full_name VARCHAR(300),
 subject  VARCHAR(300),
 business_questions VARCHAR(300),
 preferred_source_id INT NOT NULL REFERENCES sources(id),

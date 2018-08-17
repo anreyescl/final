@@ -27,9 +27,9 @@ import Dialog from "@material-ui/core/Dialog";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Divider from "@material-ui/core/Divider";
 
 import { Doughnut } from "react-chartjs-2";
 
@@ -84,6 +84,23 @@ const styles = theme => ({
     },
     flex: {
         flex: 1
+    },
+    logo: {
+        margin: 10,
+        width: 80,
+        height: 40,
+        objectFit: "cover"
+    },
+    divisor: {
+        marginBottom: 20,
+        marginTop: 20
+    },
+    totalCard: {
+        display: "flex",
+        flexDirection: "row"
+    },
+    totalMedia: {
+        width: 450
     }
 });
 
@@ -95,22 +112,31 @@ class AdminOverview extends React.Component {
     constructor(props) {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.getData = this.getData.bind(this);
+        // this.getData = this.getData.bind(this);
+        this.setTotals = this.setTotals.bind(this);
+        this.getTotalData = this.getTotalData.bind(this);
         this.handleClickOpenSource = this.handleClickOpenSource.bind(this);
         this.handleCloseSource = this.handleCloseSource.bind(this);
         this.state = {
             overview: [],
             openSource: false,
             sourceId: "",
-            sourceName: ""
+            sourceName: "",
+            overviewActuals: 0,
+            overviewCommited: 0,
+            overviewTotal: 0,
+            overviewRemaining: 0,
+            data: {}
         };
     }
     componentDidMount() {
         axios.get("/requestsoverview").then(resp => {
+            console.log("axios response component did mount");
             this.setState(resp.data);
             {
                 overview: resp.overview;
             }
+            this.getTotalData();
         });
     }
 
@@ -128,35 +154,81 @@ class AdminOverview extends React.Component {
         });
     }
 
-    getData(idSource) {
-        let actual = this.state.overview.filter(
-            source => source.id == idSource
-        )[0].actual_hours;
-        let commited = this.state.overview.filter(
-            source => source.id == idSource
-        )[0].commited_hours;
-        let remaining =
-            this.state.overview.filter(source => source.id == idSource)[0]
-                .total_hours -
-            actual -
-            commited;
+    setTotals(totalActual, totalCommited, totalTotal, totalRemaining) {
+        this.setState({
+            overviewActuals: totalActual,
+            overviewCommited: totalCommited,
+            overviewTotal: totalTotal,
+            overviewRemaining: totalRemaining
+        });
+    }
+
+    getTotalData() {
+        console.log("get data overview review", this.state.overview);
+        let totalActual = 0;
+        let totalCommited = 0;
+        let totalRemaining = 0;
+        let totalTotal = 0;
+        this.state.overview.map(source => {
+            totalTotal = totalTotal + Number(source.total_hours);
+        });
+        this.state.overview.map(source => {
+            totalActual = totalActual + Number(source.actual_hours);
+        });
+        this.state.overview.map(source => {
+            totalCommited = totalCommited + Number(source.commited_hours);
+        });
+        this.state.overview.map(source => {
+            totalRemaining =
+                totalRemaining +
+                Number(source.total_hours) -
+                Number(source.actual_hours) -
+                Number(source.commited_hours);
+        });
         let data = {
-            labels: ["Actuals", "Commited", "Remaining"],
+            labels: ["Total Actuals", "Total Commited", "Total Remaining"],
             datasets: [
                 {
-                    data: [actual, commited, remaining],
+                    data: [totalActual, totalCommited, totalRemaining],
                     backgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"],
                     hoverBackgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"]
                 }
             ]
         };
-        // console.log(data);
-        // console.log(
-        //     "review data",
-        //     this.state.overview.filter(source => source.id == idSource)[0]
-        // );
-        return data;
+
+        this.setState({
+            data: data,
+            overviewActuals: totalActual,
+            overviewCommited: totalCommited,
+            overviewTotal: totalTotal,
+            overviewRemaining: totalRemaining
+        });
     }
+
+    // getData(idSource) {
+    //     let actual = this.state.overview.filter(
+    //         source => source.id == idSource
+    //     )[0].actual_hours;
+    //     let commited = this.state.overview.filter(
+    //         source => source.id == idSource
+    //     )[0].commited_hours;
+    //     let remaining =
+    //         this.state.overview.filter(source => source.id == idSource)[0]
+    //             .total_hours -
+    //         actual -
+    //         commited;
+    //     let data = {
+    //         labels: ["Actuals", "Commited", "Remaining"],
+    //         datasets: [
+    //             {
+    //                 data: [actual, commited, remaining],
+    //                 backgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"],
+    //                 hoverBackgroundColor: ["#FF6384", "#FFCE56", "#4bc0c0"]
+    //             }
+    //         ]
+    //     };
+    //     return data;
+    // }
 
     render() {
         console.log("rendering AdminOverview");
@@ -165,33 +237,91 @@ class AdminOverview extends React.Component {
         if (!this.state.overview) {
             return null;
         }
-        // console.log("this.state.overview=", this.state.overview);
+        console.log("this.state totals=", this.state);
 
-        const Sources = (
-            <div className={classes.list}>
-                {this.state.overview.map(source => (
-                    <Card className={classes.card} key={source.id}>
-                        <CardContent>
-                            <Typography
-                                gutterBottom
-                                variant="headline"
-                                component="h2"
-                            >
-                                {source.source_name}
-                            </Typography>
-                            <Doughnut data={this.getData(source.id)} />
-                        </CardContent>
-                        <CardActions>
-                            <Button
-                                size="small"
-                                color="primary"
-                                onClick={e => console.log("click")}
-                            >
-                                Function
-                            </Button>
-                        </CardActions>
-                    </Card>
-                ))}
+        // const Sources = (
+        //     <div className={classes.list}>
+        //         {this.state.overview.map(source => (
+        //             <Card className={classes.card} key={source.id}>
+        //                 <CardContent>
+        //                     <Typography
+        //                         gutterBottom
+        //                         variant="headline"
+        //                         component="h2"
+        //                     >
+        //                         {source.source_name}
+        //                     </Typography>
+        //                     <Doughnut data={this.getData(source.id)} />
+        //                 </CardContent>
+        //                 <CardActions>
+        //                     <Button
+        //                         size="small"
+        //                         color="primary"
+        //                         onClick={e => console.log("click")}
+        //                     >
+        //                         Function
+        //                     </Button>
+        //                 </CardActions>
+        //             </Card>
+        //         ))}
+        //     </div>
+        // );
+
+        const Total = (
+            <div>
+                <Card className={classes.totalCard} key="total">
+                    <CardMedia className={classes.totalMedia} src="">
+                        <Doughnut data={this.state.data} />
+                    </CardMedia>
+                    <CardContent>
+                        <Typography
+                            gutterBottom
+                            variant="headline"
+                            component="h2"
+                        >
+                            Total Overview
+                        </Typography>
+                        <List>
+                            <ListItem>
+                                <ListItemText
+                                    primary={
+                                        "Total Hours :" +
+                                        " " +
+                                        this.state.overviewTotal
+                                    }
+                                />
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText
+                                    primary={
+                                        "Total Actuals :" +
+                                        " " +
+                                        this.state.overviewCommited
+                                    }
+                                />
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText
+                                    primary={
+                                        "Total Remaining :" +
+                                        " " +
+                                        this.state.overviewActuals
+                                    }
+                                />
+                            </ListItem>
+                            <Divider />
+                            <ListItem>
+                                <ListItemText
+                                    primary={
+                                        "Total Remaining :" +
+                                        " " +
+                                        this.state.overviewRemaining
+                                    }
+                                />
+                            </ListItem>
+                        </List>
+                    </CardContent>
+                </Card>
             </div>
         );
 
@@ -204,7 +334,9 @@ class AdminOverview extends React.Component {
                     id={this.state.sourceId}
                     overview={this.state.overview}
                 />
+                {Total}
                 {/*{Sources}*/}
+                <Divider className={classes.divisor} />
                 {!!this.state.overview.length && (
                     <DownloadDataButton
                         data={this.state.overview}
@@ -215,6 +347,7 @@ class AdminOverview extends React.Component {
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow>
+                                <CustomTableCell>Logo</CustomTableCell>
                                 <CustomTableCell>Source</CustomTableCell>
                                 <CustomTableCell>
                                     Number of Requests
@@ -243,6 +376,19 @@ class AdminOverview extends React.Component {
                                         <CustomTableCell
                                             component="th"
                                             scope="row"
+                                            source_id={n.id}
+                                            source_name={n.source_name}
+                                        >
+                                            <img
+                                                src={
+                                                    n.source_pic ||
+                                                    "/images/default.png"
+                                                }
+                                                alt={n.source_name}
+                                                className={classes.logo}
+                                            />
+                                        </CustomTableCell>
+                                        <CustomTableCell
                                             source_id={n.id}
                                             source_name={n.source_name}
                                         >
