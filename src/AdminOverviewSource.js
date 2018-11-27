@@ -285,7 +285,7 @@ class AdminOverviewSource extends React.Component {
                                     <ListItem>
                                         <ListItemText
                                             primary={
-                                                "Total Actuals :" +
+                                                "Total Commited :" +
                                                 " " +
                                                 this.state.overviewCommited
                                             }
@@ -294,7 +294,7 @@ class AdminOverviewSource extends React.Component {
                                     <ListItem>
                                         <ListItemText
                                             primary={
-                                                "Total Remaining :" +
+                                                "Total Actuals :" +
                                                 " " +
                                                 this.state.overviewActuals
                                             }
