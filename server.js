@@ -686,7 +686,9 @@ app.get("*", function(req, res) {
     }
 });
 
-server.listen(process.env.PORT || 8080); //changed foe heroku
+server.listen(process.env.PORT || 8080, () => {
+    console.log("Hello, is it me your listeining for? - Lionel");
+}); //changed foe heroku
 
 let onlineUsers = {};
 let chatMessages = [];
